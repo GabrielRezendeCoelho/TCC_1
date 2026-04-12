@@ -1,0 +1,38 @@
+# Dependências do Node (Comum)
+node_modules/
+
+# Builds e outputs
+dist/
+build/
+out/
+
+# Ambientes Locais
+.env
+.env.*
+!.env.example
+
+# Logs do Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Framework: Mobile (Expo / React Native)
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# SO e Editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

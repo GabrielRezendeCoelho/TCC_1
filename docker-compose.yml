@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Serviço PostgreSQL para armazenamento de registros locais
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: tcc-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tcc_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Volumes gerenciados pelo Docker para persistir dados além dos reboots
+volumes:
+  postgres_data:
