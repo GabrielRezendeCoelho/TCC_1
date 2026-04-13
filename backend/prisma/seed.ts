@@ -44,6 +44,25 @@ async function main() {
   });
   console.log(`✅ Motorista criado: ${driverUser.email}`);
 
+  // 3.5 Cria Cliente Padrão (Remetente)
+  const clientUser = await prisma.user.create({
+    data: {
+      name: 'Empresa Cliente',
+      email: 'logistica@empresa.com',
+      password: adminPassword, // mesma senha para ambiente de seed
+      role: Role.CLIENT,
+    },
+  });
+
+  const clientProfile = await prisma.client.create({
+    data: {
+      document: '12345678000199',
+      phone: '11988888888',
+      userId: clientUser.id,
+    },
+  });
+  console.log(`✅ Cliente Remetente criado: ${clientUser.email}`);
+
   // 4. Criação de Rota Rascunho
   const routeDraft = await prisma.route.create({
     data: {
@@ -65,6 +84,7 @@ async function main() {
         longitude: -46.633308,
         status: PackageStatus.PENDING,
         routeId: routeDraft.id,
+        clientId: clientProfile.id,
       },
       {
         trackingCode: 'TRKG002',
@@ -74,6 +94,7 @@ async function main() {
         longitude: -46.655981,
         status: PackageStatus.PENDING,
         routeId: routeDraft.id,
+        clientId: clientProfile.id,
       },
     ],
   });

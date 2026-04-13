@@ -24,4 +24,8 @@ export class CreatePackageDto {
   @IsOptional()
   @IsNumber({}, { message: 'Peso deve ser um número' })
   weight?: number;
+
+  @IsString()
+  @IsNotEmpty({ message: 'ID do cliente remetente é obrigatório' })
+  clientId: string;
 }
