@@ -136,7 +136,7 @@ describe('UsersService (Unitário)', () => {
     it('deve desativar logicamente o usuário preservando histórico (Boas Práticas)', async () => {
       // Evita duplicação chamando mock interno ou garantindo estado anterior
       const mockUser = { id: '1', name: 'To Remove' };
-      prisma.user.findUnique.mockResolvedValue(mockUser); // Simulates finding the user in `findOne` called by `remove`
+      prisma.user.findUnique.mockResolvedValue(mockUser); // Simula a busca do usuário no `findOne` chamado pelo `remove`
       prisma.user.update.mockResolvedValue({ id: '1', isActive: false });
 
       const result = await service.remove('1');
