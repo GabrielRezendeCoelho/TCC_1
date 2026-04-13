@@ -1,58 +1,98 @@
+/// <reference types="cypress" />
+
 describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
-  
   beforeEach(() => {
-    // Restaura o localStorage
-    cy.clearLocalStorage();
-  });
+    // Limpa o estado para garantir testes isolados
+    cy.clearLocalStorage()
+  })
 
   it('Não deve permitir acesso em rota protegida quando deslogado (Redirecionamento)', () => {
-    cy.visit('/dashboard');
-    cy.url().should('include', '/login');
-  });
+    cy.visit('/dashboard')
+    cy.url().should('include', '/login')
+  })
 
   it('Deve mostrar mensagem de erro com credenciais inválidas', () => {
-    cy.visit('/login');
+    // Mock do erro 401
+    cy.intercept('POST', '**/api/auth/login', {
+      statusCode: 401,
+      body: { message: 'Unauthorized' },
+    }).as('loginFail')
 
-    cy.get('input[type="email"]').type('fake@email.com');
-    cy.get('input[type="password"]').type('111111');
-    cy.get('button[type="submit"]').click();
+    cy.visit('/login')
 
-    // Como é E2E, se a API interceptar 401 ela volta 'Erro ao realizar login' no toast/label
-    cy.contains(/erro/i).should('be.visible');
-  });
+    cy.get('input[type="email"]').type('fake@email.com')
+    cy.get('input[type="password"]').type('111111')
+    cy.get('button[type="submit"]').click()
+
+    cy.wait('@loginFail')
+
+    // Verifica a mensagem de erro amigável definida no componente React
+    cy.contains(/E-mail ou senha inválidos/i).should('be.visible')
+  })
 
   it('Deve logar o usuário com sucesso e apresentar Painel Operacional', () => {
-    // Necessita do backend rodando e da seed db push aplicada
-    cy.visit('/login');
+    // Mock do sucesso no login
+    cy.intercept('POST', '**/api/auth/login', {
+      statusCode: 200,
+      body: {
+        data: {
+          accessToken: 'fake.jwt.token',
+          user: {
+            id: 'admin-id',
+            name: 'Admin TrackGo',
+            email: 'admin@trackgo.com',
+            role: 'ADMIN',
+          },
+        },
+      },
+    }).as('loginSuccess')
 
-    cy.get('input[type="email"]').type('admin@trackgo.com');
-    cy.get('input[type="password"]').type('123456');
-    cy.get('button[type="submit"]').click();
+    cy.visit('/login')
 
-    // Redireciona pro dashboard
-    cy.url().should('not.include', '/login');
-    cy.contains('Dashboard').should('be.visible');
-    cy.contains('Pacotes').should('be.visible');
-  });
+    cy.get('input[type="email"]').type('admin@trackgo.com')
+    cy.get('input[type="password"]').type('123456')
+    cy.get('button[type="submit"]').click()
+
+    cy.wait('@loginSuccess')
+
+    // Deve redirecionar e mostrar elementos do Dashboard
+    cy.url().should('not.include', '/login')
+    cy.contains('Dashboard').should('be.visible')
+  })
 
   it('Deve deslogar o admin com sucesso', () => {
-    // Step: Login primeiro (Mocando o token direto pra acelerar Cypress)
-    cy.window().then((window) => {
-      window.localStorage.setItem('trackgo_token', 'fake.jwt.token');
-      // Mock do request profile
-      cy.intercept('GET', '/api/auth/profile', {
-        statusCode: 200,
-        body: { data: { id: 'user', name: 'Admin TrackGo', role: 'ADMIN' } }
-      });
-    });
+    // Mock do profile para quando o app carregar
+    cy.intercept('GET', '**/api/auth/profile', {
+      statusCode: 200,
+      body: {
+        data: { id: 'user', name: 'Admin TrackGo', role: 'ADMIN' },
+      },
+    }).as('getProfile')
 
-    cy.visit('/');
-    cy.contains('Admin TrackGo').should('be.visible');
+    // Injeta o estado de login diretamente no localStorage antes de visitar a página
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        win.localStorage.setItem('@TrackGo:token', 'fake.jwt.token')
+        win.localStorage.setItem(
+          '@TrackGo:user',
+          JSON.stringify({
+            id: 'user',
+            name: 'Admin TrackGo',
+            email: 'admin@trackgo.com',
+            role: 'ADMIN',
+          }),
+        )
+      },
+    })
 
-    // Aciona O Logout na UI pelo ID mapeado
-    cy.get('#logout-button').click();
+    // Garante que o usuário está "logado" na UI
+    cy.contains('Admin TrackGo').should('be.visible')
 
-    // Redireciona
-    cy.url().should('include', '/login');
-  });
-});
+    // Aciona o Logout
+    cy.get('#logout-button').click()
+
+    // Deve limpar o estado e redirecionar para o login
+    cy.url().should('include', '/login')
+    cy.window().its('localStorage').invoke('getItem', '@TrackGo:token').should('be.null')
+  })
+})

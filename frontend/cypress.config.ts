@@ -12,4 +12,11 @@ export default defineConfig({
     viewportHeight: 720,
     video: false, // desativado para testes mais rápidos
   },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "vite",
+    },
+  },
 });
