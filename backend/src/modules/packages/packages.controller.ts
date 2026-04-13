@@ -31,8 +31,8 @@ export class PackagesController {
 
   @Post()
   @Roles(Role.ADMIN, Role.OPERATOR)
-  create(@Body() dto: CreatePackageDto) {
-    return this.packagesService.create(dto);
+  create(@Body() dto: Record<string, any>) {
+    return this.packagesService.create(dto as CreatePackageDto);
   }
 
   @Post('batch')
@@ -45,6 +45,12 @@ export class PackagesController {
   @Roles(Role.ADMIN, Role.OPERATOR)
   update(@Param('id') id: string, @Body() dto: UpdatePackageDto) {
     return this.packagesService.update(id, dto);
+  }
+
+  @Get('unassigned')
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  findUnassigned() {
+    return this.packagesService.findUnassigned();
   }
 
   @Delete(':id')

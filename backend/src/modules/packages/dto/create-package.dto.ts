@@ -1,6 +1,10 @@
 import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class CreatePackageDto {
+  @IsOptional()
+  @IsString()
+  trackingCode?: string;
+
   @IsString()
   @IsNotEmpty({ message: 'Nome do destinatário é obrigatório' })
   recipientName: string;
@@ -25,7 +29,7 @@ export class CreatePackageDto {
   @IsNumber({}, { message: 'Peso deve ser um número' })
   weight?: number;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: 'ID do cliente remetente é obrigatório' })
-  clientId: string;
+  clientId?: string;
 }

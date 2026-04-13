@@ -11,6 +11,11 @@ export const packagesService = {
     return data.data;
   },
 
+  async findUnassigned() {
+    const { data } = await api.get('/packages/unassigned');
+    return data.data || data; // Depende da formatação do seu backend
+  },
+
   async findOne(id: string) {
     const { data } = await api.get(`/packages/${id}`);
     return data.data;

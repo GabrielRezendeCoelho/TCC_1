@@ -58,18 +58,53 @@ export class PackagesService {
   }
 
   /**
+   * Retorna pacotes PENDING sem rota atribuída (disponíveis para roteirização).
+   */
+  async findUnassigned() {
+    return this.prisma.package.findMany({
+      where: {
+        status: 'PENDING',
+        routeId: null,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
    * Registra um novo pacote de entrega.
    */
   async create(dto: CreatePackageDto) {
-    return this.prisma.package.create({ data: dto });
+    let clientId = dto.clientId;
+
+    if (!clientId) {
+      const defaultClient = await this.prisma.client.findFirst();
+      if (!defaultClient) {
+        throw new Error('Nenhum cliente cadastrado no sistema');
+      }
+      clientId = defaultClient.id;
+    }
+
+    return this.prisma.package.create({ 
+      data: { ...dto, clientId } 
+    });
   }
 
   /**
    * Cria múltiplos pacotes em lote.
    */
   async createBatch(packages: CreatePackageDto[]) {
+    const defaultClient = await this.prisma.client.findFirst();
+    if (!defaultClient) {
+      throw new Error('Nenhum cliente cadastrado no sistema');
+    }
+
+    const data = packages.map(pkg => ({
+      ...pkg,
+      clientId: pkg.clientId || defaultClient.id,
+    }));
+
     const created = await this.prisma.package.createMany({
-      data: packages,
+      data,
     });
 
     return { count: created.count };
