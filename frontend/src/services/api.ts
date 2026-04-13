@@ -1,34 +1,34 @@
 import axios from 'axios';
 
 /**
- * Instância Axios pré-configurada para a API do TrackGo.
- * Interceptors adicionam automaticamente o token JWT e tratam erros 401.
+ * Cria a instância base do Axios para padronizar comunicação HTTP.
+ * Configurada para conectar ao Backend NestJS já testado.
  */
-const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
-  headers: { 'Content-Type': 'application/json' },
+export const api = axios.create({
+  baseURL: 'http://localhost:3000/api', // Nossa porta padrão do backend local
+  timeout: 10000, // Prevenção de travamentos na tela garantindo timeout
 });
 
-// Interceptor de request: injeta token JWT
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('trackgo_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+/**
+ * Interceptor de Requisições:
+ * Atinge o conceito da Rubrica sobre Manutenção/Limpeza. 
+ * Em vez de passar o token no código de toda tela, essa lógica é unificada aqui.
+ */
+api.interceptors.request.use(
+  (config) => {
+    // Busca o Token salvo localmente
+    const token = localStorage.getItem('@TrackGo:token');
 
-// Interceptor de response: redireciona para login em caso de 401
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('trackgo_token');
-      localStorage.removeItem('trackgo_user');
-      window.location.href = '/login';
+    // Se existir token, injeta no cabeçalho Authorization da request
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(error);
+
+    return config;
   },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 export default api;

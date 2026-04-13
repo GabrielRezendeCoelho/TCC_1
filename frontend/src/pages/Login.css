@@ -1,0 +1,456 @@
+/* ==========================================================================
+   Login Page — Tela Completa de Autenticação
+   Requisitos: Glassmorphism, Responsividade, Feedback Visual Premium
+   ========================================================================== */
+
+/* ===== Container Principal ===== */
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--spacing-4);
+  animation: fadeInSlideUp var(--transition-smooth);
+
+  /* Fundo com gradiente suave corporativo */
+  background:
+    radial-gradient(ellipse at top right, rgba(37, 99, 235, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #F0F4FF 0%, #F3F4F6 50%, #ECFDF5 100%);
+}
+
+/* ===== Card Central (Glassmorphism) ===== */
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--spacing-8);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-floating);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+/* ===== Header (Logo + Título + Subtítulo) ===== */
+.login-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.login-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+  margin-bottom: var(--spacing-1);
+}
+
+.login-logo-icon {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-md);
+  color: white;
+  font-size: 1.5rem;
+  line-height: 48px;
+  text-align: center;
+  margin-bottom: var(--spacing-3);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-title);
+  margin-bottom: var(--spacing-1);
+}
+
+.login-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ===== Formulário ===== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ===== Input Group (Genérico) ===== */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-body);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-md);
+  border: 1.5px solid #E5E7EB;
+  background: var(--color-surface);
+  color: var(--color-text-title);
+  font-size: 0.9375rem;
+  transition: all var(--transition-base);
+}
+
+.input-wrapper input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input-wrapper input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: none;
+}
+
+/* Estado de erro nos inputs */
+.input-wrapper input.input-error {
+  border-color: var(--color-error);
+}
+
+.input-wrapper input.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+/* Padding extra para input com botão do olho */
+.input-wrapper input.has-toggle {
+  padding-right: 3rem;
+}
+
+/* ===== Botão Olho (Toggle Senha) ===== */
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color var(--transition-base);
+}
+
+.toggle-password:hover {
+  color: var(--color-primary);
+}
+
+.toggle-password:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.toggle-password svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== Mensagem de Erro Inline ===== */
+.field-error {
+  color: var(--color-error);
+  font-size: 0.75rem;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeInSlideUp 0.2s ease;
+}
+
+/* ===== Caps Lock Warning ===== */
+.caps-warning {
+  color: var(--color-warning);
+  font-size: 0.75rem;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeInSlideUp 0.2s ease;
+}
+
+/* ===== Link "Esqueci minha senha" ===== */
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.25rem;
+}
+
+.forgot-password-link {
+  font-size: 0.8125rem;
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition-base);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.forgot-password-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* ===== Alerta Global de Erro (API) ===== */
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-error);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: fadeInSlideUp 0.3s ease;
+}
+
+.error-alert svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Alerta de Sucesso ===== */
+.success-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: fadeInSlideUp 0.3s ease;
+}
+
+/* ===== Botão Principal ===== */
+.btn-primary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 0.85rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: var(--spacing-2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== Spinner de Loading ===== */
+.spinner {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFF;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ===== Modal Esqueci Senha ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+  padding: var(--spacing-4);
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  animation: fadeInSlideUp 0.3s ease;
+}
+
+.modal-card h2 {
+  font-size: 1.25rem;
+  color: var(--color-text-title);
+}
+
+.modal-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-body);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: var(--border-radius-md);
+  border: 1.5px solid #E5E7EB;
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-secondary:hover {
+  background: var(--color-surface-hover);
+  border-color: #D1D5DB;
+}
+
+.btn-modal-primary {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: var(--border-radius-md);
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-modal-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-modal-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Barra de Força de Senha (Reutilizável p/ Cadastro) ===== */
+.password-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+}
+
+.strength-bar {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: #E5E7EB;
+  transition: background var(--transition-base);
+}
+
+.strength-bar.active.weak {
+  background: var(--color-error);
+}
+
+.strength-bar.active.medium {
+  background: var(--color-warning);
+}
+
+.strength-bar.active.strong {
+  background: var(--color-secondary);
+}
+
+.strength-text {
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.strength-text.weak {
+  color: var(--color-error);
+}
+
+.strength-text.medium {
+  color: var(--color-warning);
+}
+
+.strength-text.strong {
+  color: var(--color-secondary);
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 480px) {
+  .login-card {
+    padding: var(--spacing-5);
+    border-radius: var(--border-radius-md);
+  }
+
+  .login-logo {
+    font-size: 1.75rem;
+  }
+
+  .login-title {
+    font-size: 1.25rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* ===== Animações ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

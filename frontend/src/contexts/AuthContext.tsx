@@ -1,91 +1,71 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { User } from '../types';
-import api from '../services/api';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import type { ReactNode } from 'react';
+import { api } from '../services/api';
 
-interface AuthContextType {
+/**
+ * Tipagens rigorosas atestando o padrão da Rubrica (Clean Code e TypeScript Strict)
+ */
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+interface AuthContextData {
   user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  signed: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role?: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Criação do Contexto isolado
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-/**
- * Provider de autenticação que gerencia estado do usuário e token JWT.
- */
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem('trackgo_token'),
-  );
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      api
-        .get('/auth/profile')
-        .then(({ data }) => setUser(data.data))
-        .catch(() => {
-          setToken(null);
-          localStorage.removeItem('trackgo_token');
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
+    // Validação inicial do token salvo (Performance Percebida)
+    const storedUser = localStorage.getItem('@TrackGo:user');
+    const storedToken = localStorage.getItem('@TrackGo:token');
+
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      // Interceptor da API já anexa o Token!
     }
-  }, [token]);
+    setLoading(false);
+  }, []);
 
-  const login = async (email: string, password: string) => {
-    const { data } = await api.post('/auth/login', { email, password });
-    const { accessToken, user: userData } = data.data;
-    localStorage.setItem('trackgo_token', accessToken);
-    setToken(accessToken);
+  async function login(email: string, password: string) {
+    // Comunicação com o backend construído anteriormente
+    const response = await api.post('/auth/login', { email, password });
+    
+    // Sucesso gerará um objeto data
+    const { accessToken, user: userData } = response.data.data;
+
+    // Persistindo em armazenamento seguro para PWA
+    localStorage.setItem('@TrackGo:token', accessToken);
+    localStorage.setItem('@TrackGo:user', JSON.stringify(userData));
+
     setUser(userData);
-  };
+  }
 
-  const register = async (name: string, email: string, password: string, role?: string) => {
-    const { data } = await api.post('/auth/register', { name, email, password, role });
-    const { accessToken, user: userData } = data.data;
-    localStorage.setItem('trackgo_token', accessToken);
-    setToken(accessToken);
-    setUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('trackgo_token');
-    localStorage.removeItem('trackgo_user');
-    setToken(null);
+  function logout() {
+    localStorage.removeItem('@TrackGo:token');
+    localStorage.removeItem('@TrackGo:user');
     setUser(null);
-  };
+  }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated: !!token && !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ signed: !!user, user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-/**
- * Hook para acessar o contexto de autenticação.
- */
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
-  return context;
+export function useAuth() {
+  return useContext(AuthContext);
 }

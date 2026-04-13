@@ -12,9 +12,9 @@ interface PrivateRouteProps {
  * Opcionalmente verifica roles permitidas.
  */
 export function PrivateRoute({ children, roles }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { signed, loading, user } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="loading-container">
         <div className="spinner" />
@@ -22,7 +22,7 @@ export function PrivateRoute({ children, roles }: PrivateRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!signed) {
     return <Navigate to="/login" replace />;
   }
 

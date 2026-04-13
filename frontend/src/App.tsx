@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Packages } from './pages/Packages';
 import { Routes as RoutesPage } from './pages/Routes';
 import { Drivers } from './pages/Drivers';
+import { Users } from './pages/Users';
 import './index.css';
 
 /**
@@ -31,6 +32,7 @@ function App() {
             <Route path="/packages" element={<Packages />} />
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/drivers" element={<Drivers />} />
+            <Route path="/users" element={<Users />} />
           </Route>
 
           {/* Fallback */}
