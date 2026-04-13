@@ -21,6 +21,11 @@ export const routesService = {
     return data.data;
   },
 
+  async generateSmart(payload: { name: string; date: string; packageIds: string[] }) {
+    const { data } = await api.post('/routes/generate-smart', payload);
+    return data.data;
+  },
+
   async update(id: string, route: Partial<DeliveryRoute>) {
     const { data } = await api.patch(`/routes/${id}`, route);
     return data.data;

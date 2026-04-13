@@ -209,6 +209,110 @@ export class RoutesService {
   }
 
   /**
+   * Calcula distância entre dois pontos usando fórmula de Haversine (em km).
+   */
+  private haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Raio da Terra em km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /**
+   * Gera rota inteligente usando Nearest Neighbor.
+   * Pega o endereço base do perfil do usuário logado.
+   * Ordena entregas do mais perto ao mais longe da base.
+   */
+  async generateSmart(
+    body: { name: string; date: string; packageIds: string[] },
+    userId: string,
+  ) {
+    // 1. Busca o perfil do usuário para pegar o endereço da base
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user?.baseLat || !user?.baseLng || !user?.baseAddress) {
+      throw new BadRequestException(
+        'Você precisa cadastrar o endereço da base no seu perfil antes de gerar uma rota inteligente.',
+      );
+    }
+
+    if (!body.packageIds || body.packageIds.length === 0) {
+      throw new BadRequestException('Selecione ao menos uma entrega para gerar a rota.');
+    }
+
+    // 2. Busca os pacotes selecionados
+    const packages = await this.prisma.package.findMany({
+      where: { id: { in: body.packageIds } },
+    });
+
+    // 3. Separa pacotes com e sem coordenadas
+    const withCoords = packages.filter((p) => p.latitude != null && p.longitude != null);
+    const withoutCoords = packages.filter((p) => p.latitude == null || p.longitude == null);
+
+    // 4. Algoritmo Nearest Neighbor
+    const ordered: typeof withCoords = [];
+    const remaining = [...withCoords];
+    let currentLat = user.baseLat;
+    let currentLng = user.baseLng;
+    let totalDistance = 0;
+
+    while (remaining.length > 0) {
+      let nearestIdx = 0;
+      let nearestDist = Infinity;
+
+      for (let i = 0; i < remaining.length; i++) {
+        const dist = this.haversine(
+          currentLat, currentLng,
+          remaining[i].latitude!, remaining[i].longitude!,
+        );
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestIdx = i;
+        }
+      }
+
+      totalDistance += nearestDist;
+      currentLat = remaining[nearestIdx].latitude!;
+      currentLng = remaining[nearestIdx].longitude!;
+      ordered.push(remaining[nearestIdx]);
+      remaining.splice(nearestIdx, 1);
+    }
+
+    // 5. Pacotes sem coordenadas vão pro final
+    const finalOrder = [...ordered, ...withoutCoords];
+    const orderedIds = finalOrder.map((p) => p.id);
+
+    // 6. Cria a rota no banco
+    const route = await this.prisma.route.create({
+      data: {
+        name: body.name,
+        date: new Date(body.date),
+        status: RouteStatus.OPTIMIZED,
+        startAddress: user.baseAddress,
+        optimizedOrder: orderedIds,
+        totalDistance: Math.round(totalDistance * 100) / 100,
+        estimatedTime: Math.round((totalDistance / 40) * 60), // ~40 km/h média urbana → minutos
+        createdById: userId,
+      },
+    });
+
+    // 7. Vincula pacotes à rota
+    await this.prisma.package.updateMany({
+      where: { id: { in: body.packageIds } },
+      data: { routeId: route.id },
+    });
+
+    return this.findOne(route.id);
+  }
+
+  /**
    * Remove uma rota e desvincula seus pacotes.
    */
   async remove(id: string) {

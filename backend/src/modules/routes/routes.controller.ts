@@ -55,6 +55,15 @@ export class RoutesController {
     return this.routesService.assignDriver(routeId, driverId);
   }
 
+  @Post('generate-smart')
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  generateSmart(
+    @Body() body: { name: string; date: string; packageIds: string[] },
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.routesService.generateSmart(body, userId);
+  }
+
   @Delete(':id')
   @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
