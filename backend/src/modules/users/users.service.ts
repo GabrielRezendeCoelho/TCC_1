@@ -147,4 +147,13 @@ export class UsersService {
       select: { id: true, isActive: true },
     });
   }
+
+  /**
+   * Exclui permanentemente um usuário do banco de dados (hard delete).
+   */
+  async hardDelete(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.user.delete({ where: { id } });
+  }
 }

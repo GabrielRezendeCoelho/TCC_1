@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 import { Public, CurrentUser } from '../../common/decorators';
@@ -23,5 +23,13 @@ export class AuthController {
   @Get('profile')
   getProfile(@CurrentUser('id') userId: string) {
     return this.authService.getProfile(userId);
+  }
+
+  @Patch('profile')
+  updateProfile(
+    @CurrentUser('id') userId: string,
+    @Body() body: { name?: string; baseAddress?: string; baseLat?: number; baseLng?: number },
+  ) {
+    return this.authService.updateProfile(userId, body);
   }
 }

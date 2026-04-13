@@ -49,14 +49,17 @@ enum OccurrenceSeverity {
 // --- Models ---
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(DRIVER)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(DRIVER)
+  isActive    Boolean  @default(true)
+  baseAddress String?  // Endereço da base para geração de rotas
+  baseLat     Float?   // Latitude da base
+  baseLng     Float?   // Longitude da base
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   driver        Driver?
   client        Client?

@@ -78,6 +78,9 @@ export class AuthService {
         email: true,
         role: true,
         isActive: true,
+        baseAddress: true,
+        baseLat: true,
+        baseLng: true,
         createdAt: true,
       },
     });
@@ -87,6 +90,28 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  /**
+   * Atualiza o perfil do usuário autenticado (nome, endereço base).
+   */
+  async updateProfile(
+    userId: string,
+    data: { name?: string; baseAddress?: string; baseLat?: number; baseLng?: number },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        baseAddress: true,
+        baseLat: true,
+        baseLng: true,
+      },
+    });
   }
 
   /**

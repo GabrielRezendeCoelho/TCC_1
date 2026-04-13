@@ -1,0 +1,258 @@
+/* ==========================================================================
+   Modal Reutilizável + Formulários CRUD
+   ========================================================================== */
+
+/* ===== Overlay ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--spacing-4);
+  animation: fadeIn 0.15s ease;
+}
+
+/* ===== Card do Modal ===== */
+.modal-card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-floating);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  animation: fadeInSlideUp 0.25s ease;
+}
+
+.modal-card h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-title);
+}
+
+.modal-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-body);
+  line-height: 1.5;
+}
+
+/* ===== Formulário dentro do Modal ===== */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-body);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--border-radius-sm);
+  border: 1.5px solid #E5E7EB;
+  background: var(--color-surface);
+  color: var(--color-text-title);
+  font-size: 0.875rem;
+  transition: all var(--transition-base);
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+/* ===== Ações do Modal ===== */
+.modal-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  border: 1.5px solid #E5E7EB;
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-cancel:hover {
+  background: var(--color-surface-hover);
+  border-color: #D1D5DB;
+}
+
+.btn-save {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-error);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-danger:hover {
+  background: #DC2626;
+}
+
+/* ===== Botão de Ação no Header da Página ===== */
+.btn-new {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.btn-new:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== Botões inline na Tabela ===== */
+.table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #E5E7EB;
+  background: var(--color-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  transition: all var(--transition-base);
+}
+
+.btn-icon:hover {
+  background: var(--color-surface-hover);
+}
+
+.btn-icon.edit:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-icon.delete:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* ===== Toast de Sucesso ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 300;
+  animation: fadeInSlideUp 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.toast--success {
+  background: var(--color-secondary);
+  color: white;
+}
+
+.toast--error {
+  background: var(--color-error);
+  color: white;
+}
+
+/* ===== Confirmação de Exclusão ===== */
+.confirm-text {
+  font-size: 0.9375rem;
+  color: var(--color-text-body);
+  line-height: 1.6;
+}
+
+.confirm-text strong {
+  color: var(--color-error);
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .modal-actions {
+    flex-direction: column;
+  }
+}
