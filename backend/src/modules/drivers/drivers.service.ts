@@ -91,12 +91,42 @@ export class DriversService {
   }
 
   /**
-   * Remove um perfil de motorista.
+   * Remove (soft delete) um motorista desativando seu usuário.
    */
   async remove(id: string) {
-    await this.findOne(id);
+    const driver = await this.findOne(id);
 
-    return this.prisma.driver.delete({ where: { id } });
+    return this.prisma.user.update({
+      where: { id: driver.userId },
+      data: { isActive: false },
+      select: { id: true, isActive: true },
+    });
+  }
+
+  /**
+   * Remove permanentemente (hard delete) o motorista e seu usuário.
+   */
+  async hardDelete(id: string) {
+    const driver = await this.findOne(id);
+    
+    // Deleta o motorista primeiro devido a restrições
+    await this.prisma.driver.delete({ where: { id } });
+    
+    // Depois deleta o usuário original
+    return this.prisma.user.delete({ where: { id: driver.userId } });
+  }
+
+  /**
+   * Ativa novamente o motorista (reativa o usuário).
+   */
+  async activate(id: string) {
+    const driver = await this.findOne(id);
+
+    return this.prisma.user.update({
+      where: { id: driver.userId },
+      data: { isActive: true },
+      select: { id: true, isActive: true },
+    });
   }
 
   /**

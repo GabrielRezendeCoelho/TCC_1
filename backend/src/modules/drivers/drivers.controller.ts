@@ -51,4 +51,16 @@ export class DriversController {
   remove(@Param('id') id: string) {
     return this.driversService.remove(id);
   }
+
+  @Delete(':id/hard')
+  @Roles(Role.ADMIN)
+  hardDelete(@Param('id') id: string) {
+    return this.driversService.hardDelete(id);
+  }
+
+  @Patch(':id/activate')
+  @Roles(Role.ADMIN)
+  activate(@Param('id') id: string) {
+    return this.driversService.activate(id);
+  }
 }
