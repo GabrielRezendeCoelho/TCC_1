@@ -2,18 +2,31 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/database.service';
-import { RouteOptimizerService } from './services/route-optimizer.service';
+import {
+  IRouteOptimizer,
+  ROUTE_OPTIMIZER_TOKEN,
+} from './interfaces/route-optimizer.interface';
 import { CreateRouteDto, UpdateRouteDto } from './dto';
 import { PaginationDto } from '../../common/dtos';
 import { RouteStatus, PackageStatus } from '@prisma/client';
 
+/**
+ * SOLID — Dependency Inversion Principle (DIP)
+ *
+ * O RoutesService depende de uma abstração (IRouteOptimizer) injetada via TOKEN,
+ * em vez de uma implementação concreta (RouteOptimizerService). Isso reduz
+ * o acoplamento e facilita a substituição do algoritmo de otimização no futuro
+ * (por exemplo, trocar OSRM por Google Maps) sem alterar este serviço.
+ */
 @Injectable()
 export class RoutesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly routeOptimizer: RouteOptimizerService,
+    @Inject(ROUTE_OPTIMIZER_TOKEN)
+    private readonly routeOptimizer: IRouteOptimizer,
   ) {}
 
   /**
@@ -211,7 +224,12 @@ export class RoutesService {
   /**
    * Calcula distância entre dois pontos usando fórmula de Haversine (em km).
    */
-  private haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  private haversine(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+  ): number {
     const R = 6371; // Raio da Terra em km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -244,7 +262,9 @@ export class RoutesService {
     }
 
     if (!body.packageIds || body.packageIds.length === 0) {
-      throw new BadRequestException('Selecione ao menos uma entrega para gerar a rota.');
+      throw new BadRequestException(
+        'Selecione ao menos uma entrega para gerar a rota.',
+      );
     }
 
     // 2. Busca os pacotes selecionados
@@ -253,8 +273,12 @@ export class RoutesService {
     });
 
     // 3. Separa pacotes com e sem coordenadas
-    const withCoords = packages.filter((p) => p.latitude != null && p.longitude != null);
-    const withoutCoords = packages.filter((p) => p.latitude == null || p.longitude == null);
+    const withCoords = packages.filter(
+      (p) => p.latitude != null && p.longitude != null,
+    );
+    const withoutCoords = packages.filter(
+      (p) => p.latitude == null || p.longitude == null,
+    );
 
     // 4. Algoritmo Nearest Neighbor
     const ordered: typeof withCoords = [];
@@ -269,8 +293,10 @@ export class RoutesService {
 
       for (let i = 0; i < remaining.length; i++) {
         const dist = this.haversine(
-          currentLat, currentLng,
-          remaining[i].latitude!, remaining[i].longitude!,
+          currentLat,
+          currentLng,
+          remaining[i].latitude!,
+          remaining[i].longitude!,
         );
         if (dist < nearestDist) {
           nearestDist = dist;

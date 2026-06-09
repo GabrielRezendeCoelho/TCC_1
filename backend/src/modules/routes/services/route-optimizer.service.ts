@@ -1,34 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { LockedLoggerService } from '../../../common/interceptors';
+import {
+  IRouteOptimizer,
+  Waypoint,
+  OptimizationResult,
+} from '../interfaces/route-optimizer.interface';
 
 /**
- * Coordenada geográfica de um ponto de entrega.
- */
-interface Waypoint {
-  id: string;
-  latitude: number;
-  longitude: number;
-}
-
-/**
- * Resultado da otimização de rota.
- */
-interface OptimizationResult {
-  orderedWaypoints: Waypoint[];
-  totalDistance: number;
-  estimatedTime: number;
-}
-
-/**
- * Serviço isolado responsável por calcular rotas otimizadas
- * usando a API OSRM (Open Source Routing Machine).
+ * SOLID — Single Responsibility Principle (SRP)
  *
- * Separado do RoutesService para manter responsabilidade única
- * e facilitar testes com mock.
+ * Serviço isolado responsável EXCLUSIVAMENTE por calcular rotas otimizadas
+ * usando a API OSRM (Open Source Routing Machine).
+ * Ele não acessa o banco de dados nem sabe de regras de negócio de pacotes.
+ *
+ * SOLID — Dependency Inversion Principle (DIP)
+ *
+ * Implementa a abstração IRouteOptimizer, permitindo que quem o consome
+ * dependa de uma abstração e não de uma implementação concreta.
+ *
+ * Utiliza o LockedLoggerService (Mutex) para garantir que os logs
+ * de otimização sejam escritos de forma serializada, sem intercalação
+ * em chamadas concorrentes.
  */
 @Injectable()
-export class RouteOptimizerService {
-  private readonly logger = new Logger(RouteOptimizerService.name);
+export class RouteOptimizerService implements IRouteOptimizer {
   private readonly osrmBaseUrl = 'https://router.project-osrm.org';
+
+  constructor(private readonly lockedLogger: LockedLoggerService) {}
 
   /**
    * Calcula a sequência otimizada de entregas usando OSRM Trip API.
@@ -60,10 +58,20 @@ export class RouteOptimizerService {
       const url = `${this.osrmBaseUrl}/trip/v1/driving/${coordinates}?overview=false&source=first&roundtrip=false`;
 
       const response = await fetch(url);
-      const data = await response.json();
+      interface OsrmResponse {
+        code: string;
+        trips?: Array<{ distance: number; duration: number }>;
+        waypoints?: Array<{ waypoint_index: number }>;
+      }
+
+      const data = (await response.json()) as OsrmResponse;
 
       if (data.code !== 'Ok') {
-        this.logger.warn(`OSRM returned: ${data.code}. Using fallback order.`);
+        await this.lockedLogger.logWarn(
+          'RouteOptimizer',
+          `OSRM retornou código não-OK: ${data.code}. Utilizando fallback.`,
+          { osrmCode: data.code },
+        );
         return this.fallbackOrder(waypoints);
       }
 
@@ -77,21 +85,36 @@ export class RouteOptimizerService {
           (a: { waypoint_index: number }, b: { waypoint_index: number }) =>
             a.waypoint_index - b.waypoint_index,
         )
-        .map(
-          (wp: { waypoint_index: number }) => wp.waypoint_index - 1,
-        );
+        .map((wp: { waypoint_index: number }) => wp.waypoint_index - 1);
 
       const orderedWaypoints = waypointIndices.map(
         (index: number) => waypoints[index],
       );
 
-      return {
+      const result: OptimizationResult = {
         orderedWaypoints,
-        totalDistance: Math.round(trip.distance / 1000 * 100) / 100,
-        estimatedTime: Math.round(trip.duration / 60 * 100) / 100,
+        totalDistance: Math.round((trip.distance / 1000) * 100) / 100,
+        estimatedTime: Math.round((trip.duration / 60) * 100) / 100,
       };
+
+      await this.lockedLogger.logInfo(
+        'RouteOptimizer',
+        `Rota otimizada com sucesso via OSRM`,
+        {
+          totalDistance: result.totalDistance,
+          estimatedTime: result.estimatedTime,
+          waypointCount: result.orderedWaypoints.length,
+        },
+      );
+
+      return result;
     } catch (error) {
-      this.logger.error('Failed to optimize route via OSRM', error);
+      await this.lockedLogger.logError(
+        'RouteOptimizer',
+        'Falha ao otimizar rota via OSRM. Utilizando fallback.',
+        error instanceof Error ? error : new Error(String(error)),
+        { waypointCount: waypoints.length },
+      );
       return this.fallbackOrder(waypoints);
     }
   }
