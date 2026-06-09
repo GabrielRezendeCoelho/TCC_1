@@ -7,14 +7,24 @@ import {
   Body,
   Param,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto, UpdateRouteDto } from './dto';
 import { PaginationDto } from '../../common/dtos';
 import { Roles, CurrentUser } from '../../common/decorators';
+import { LoggingInterceptor } from '../../common/interceptors';
 import { Role } from '@prisma/client';
 
+/**
+ * Controller de Rotas — ponto central de operações logísticas.
+ *
+ * O @UseInterceptors(LoggingInterceptor) ativa o logging com Lock (Mutex)
+ * para todas as chamadas deste controller. O Lock garante que as escritas
+ * de log sejam serializadas, evitando intercalação em chamadas concorrentes.
+ */
 @Controller('routes')
+@UseInterceptors(LoggingInterceptor)
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
