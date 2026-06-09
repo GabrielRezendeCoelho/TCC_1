@@ -97,7 +97,12 @@ export class AuthService {
    */
   async updateProfile(
     userId: string,
-    data: { name?: string; baseAddress?: string; baseLat?: number; baseLng?: number },
+    data: {
+      name?: string;
+      baseAddress?: string;
+      baseLat?: number;
+      baseLng?: number;
+    },
   ) {
     return this.prisma.user.update({
       where: { id: userId },

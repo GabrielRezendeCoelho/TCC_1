@@ -4,6 +4,6 @@ import { OccurrencesService } from './occurrences.service';
 
 @Module({
   controllers: [OccurrencesController],
-  providers: [OccurrencesService]
+  providers: [OccurrencesService],
 })
 export class OccurrencesModule {}

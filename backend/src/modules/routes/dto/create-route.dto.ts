@@ -22,6 +22,9 @@ export class CreateRouteDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true, message: 'IDs de pacotes devem ser UUIDs válidos' })
+  @IsUUID('4', {
+    each: true,
+    message: 'IDs de pacotes devem ser UUIDs válidos',
+  })
   packageIds?: string[];
 }

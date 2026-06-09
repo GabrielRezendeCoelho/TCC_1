@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/database.service';
 import { CreateDriverDto, UpdateDriverDto } from './dto';
 import { PaginationDto } from '../../common/dtos';
@@ -17,8 +21,14 @@ export class DriversService {
     const where = search
       ? {
           OR: [
-            { user: { name: { contains: search, mode: 'insensitive' as const } } },
-            { licenseNumber: { contains: search, mode: 'insensitive' as const } },
+            {
+              user: {
+                name: { contains: search, mode: 'insensitive' as const },
+              },
+            },
+            {
+              licenseNumber: { contains: search, mode: 'insensitive' as const },
+            },
           ],
         }
       : {};
@@ -108,10 +118,10 @@ export class DriversService {
    */
   async hardDelete(id: string) {
     const driver = await this.findOne(id);
-    
+
     // Deleta o motorista primeiro devido a restrições
     await this.prisma.driver.delete({ where: { id } });
-    
+
     // Depois deleta o usuário original
     return this.prisma.user.delete({ where: { id: driver.userId } });
   }

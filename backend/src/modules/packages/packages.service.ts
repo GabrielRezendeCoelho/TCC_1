@@ -17,8 +17,12 @@ export class PackagesService {
     const where = search
       ? {
           OR: [
-            { recipientName: { contains: search, mode: 'insensitive' as const } },
-            { trackingCode: { contains: search, mode: 'insensitive' as const } },
+            {
+              recipientName: { contains: search, mode: 'insensitive' as const },
+            },
+            {
+              trackingCode: { contains: search, mode: 'insensitive' as const },
+            },
             { address: { contains: search, mode: 'insensitive' as const } },
           ],
         }
@@ -84,8 +88,8 @@ export class PackagesService {
       clientId = defaultClient.id;
     }
 
-    return this.prisma.package.create({ 
-      data: { ...dto, clientId } 
+    return this.prisma.package.create({
+      data: { ...dto, clientId },
     });
   }
 
@@ -98,7 +102,7 @@ export class PackagesService {
       throw new Error('Nenhum cliente cadastrado no sistema');
     }
 
-    const data = packages.map(pkg => ({
+    const data = packages.map((pkg) => ({
       ...pkg,
       clientId: pkg.clientId || defaultClient.id,
     }));
