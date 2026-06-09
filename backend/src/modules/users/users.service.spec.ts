@@ -95,11 +95,11 @@ describe('UsersService (Unitário)', () => {
   describe('Cenário: Criação de Usuário e Segurança (create)', () => {
     it('deve criptografar a senha corretamente e criar o usuário', async () => {
       // O módulo bcrypt foi mockado globalmente para isolar a regra do fluxo
-      const createDto = { 
-        name: 'New User', 
-        email: 'new@test.com', 
+      const createDto = {
+        name: 'New User',
+        email: 'new@test.com',
         password: 'plain_password',
-        role: Role.DRIVER 
+        role: Role.DRIVER,
       };
 
       prisma.user.findUnique.mockResolvedValue(null);
@@ -119,16 +119,68 @@ describe('UsersService (Unitário)', () => {
     });
 
     it('deve lançar ConflictException se o e-mail já existe', async () => {
-      prisma.user.findUnique.mockResolvedValue({ id: '1', email: 'existing@test.com' });
+      prisma.user.findUnique.mockResolvedValue({
+        id: '1',
+        email: 'existing@test.com',
+      });
 
       await expect(
-        service.create({ 
-          name: 'Existing', 
-          email: 'existing@test.com', 
-          password: 'password', 
-          role: Role.OPERATOR 
-        })
+        service.create({
+          name: 'Existing',
+          email: 'existing@test.com',
+          password: 'password',
+          role: Role.OPERATOR,
+        }),
       ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('Cenário: Atualização de Usuário (update)', () => {
+    it('deve atualizar os dados do usuário com sucesso', async () => {
+      const mockUser = { id: '1', name: 'Original', email: 'test@test.com' };
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({
+        id: '1',
+        name: 'Atualizado',
+        email: 'test@test.com',
+        role: Role.OPERATOR,
+        isActive: true,
+        updatedAt: new Date(),
+      });
+
+      const result = await service.update('1', { name: 'Atualizado' });
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: { name: 'Atualizado' },
+        select: expect.any(Object),
+      });
+      expect(result.name).toBe('Atualizado');
+    });
+
+    it('deve criptografar a nova senha ao atualizar', async () => {
+      const mockUser = { id: '1', name: 'User' };
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ id: '1', name: 'User' });
+
+      await service.update('1', { password: 'novaSenha123' });
+
+      expect(bcrypt.hash).toHaveBeenCalledWith('novaSenha123', 10);
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            password: 'hashed_password_mock',
+          }),
+        }),
+      );
+    });
+
+    it('deve lançar NotFoundException se o usuário não existir ao atualizar', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.update('inexistente', { name: 'Novo' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

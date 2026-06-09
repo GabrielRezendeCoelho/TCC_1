@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request = require('supertest');
 import { AppModule } from '../src/app.module';
 
 describe('App & Auth (e2e)', () => {
@@ -42,20 +47,20 @@ describe('App & Auth (e2e)', () => {
       validToken = response.body.data.accessToken;
     } else {
       // Se a seed não rodou, o teste falha mas reporta adequadamente.
-      console.warn('Banco local desatualizado ou sem seed. Setup necessário para E2E local.');
+      console.warn(
+        'Banco local desatualizado ou sem seed. Setup necessário para E2E local.',
+      );
     }
   });
 
   it('/api/auth/profile (GET) - Deve bloquear acesso sem token', () => {
-    return request(app.getHttpServer())
-      .get('/api/auth/profile')
-      .expect(401); // Unauthorized
+    return request(app.getHttpServer()).get('/api/auth/profile').expect(401); // Unauthorized
   });
 
-  it('/api/auth/profile (GET) - Deve permitir acesso com token valido', () => {
+  it('/api/auth/profile (GET) - Deve permitir acesso com token valido', async () => {
     if (!validToken) return; // salta se o BD local não tinha a seed aplicada
-    
-    return request(app.getHttpServer())
+
+    await request(app.getHttpServer())
       .get('/api/auth/profile')
       .set('Authorization', `Bearer ${validToken}`)
       .expect(200);

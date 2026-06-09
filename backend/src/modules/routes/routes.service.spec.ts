@@ -1,25 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoutesService } from './routes.service';
 import { PrismaService } from '../../database/database.service';
-import { RouteOptimizerService } from './services/route-optimizer.service';
+import {
+  IRouteOptimizer,
+  ROUTE_OPTIMIZER_TOKEN,
+} from './interfaces/route-optimizer.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { RouteStatus, PackageStatus } from '@prisma/client';
 
 describe('RoutesService', () => {
   let routesService: RoutesService;
   let prismaService: PrismaService;
-  let routeOptimizerService: RouteOptimizerService;
+  let routeOptimizerService: IRouteOptimizer;
 
   const mockPrismaService = {
     route: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
     },
     driver: {
       findUnique: jest.fn(),
     },
     package: {
       updateMany: jest.fn(),
+      findMany: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(),
     },
   };
 
@@ -32,13 +43,13 @@ describe('RoutesService', () => {
       providers: [
         RoutesService,
         { provide: PrismaService, useValue: mockPrismaService },
-        { provide: RouteOptimizerService, useValue: mockOptimizerService },
+        { provide: ROUTE_OPTIMIZER_TOKEN, useValue: mockOptimizerService },
       ],
     }).compile();
 
     routesService = module.get<RoutesService>(RoutesService);
     prismaService = module.get<PrismaService>(PrismaService);
-    routeOptimizerService = module.get<RouteOptimizerService>(RouteOptimizerService);
+    routeOptimizerService = module.get<IRouteOptimizer>(ROUTE_OPTIMIZER_TOKEN);
   });
 
   afterEach(() => {
@@ -52,7 +63,9 @@ describe('RoutesService', () => {
         startAddress: null,
       });
 
-      await expect(routesService.optimize('route-1')).rejects.toThrow(BadRequestException);
+      await expect(routesService.optimize('route-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve rejeitar se a rota tiver menos de 2 pacotes com coordenadas mapeadas', async () => {
@@ -60,11 +73,13 @@ describe('RoutesService', () => {
         id: 'route-1',
         startAddress: 'Rua A',
         packages: [
-          { id: 'pkg-1', latitude: 10, longitude: 10 } // só 1 pacote
+          { id: 'pkg-1', latitude: 10, longitude: 10 }, // só 1 pacote
         ],
       });
 
-      await expect(routesService.optimize('route-1')).rejects.toThrow(BadRequestException);
+      await expect(routesService.optimize('route-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve chamar o otimizador e atualizar a rota com o status OPTIMIZED em caso de sucesso', async () => {
@@ -72,7 +87,7 @@ describe('RoutesService', () => {
         { id: 'pkg-1', latitude: 10, longitude: 10 },
         { id: 'pkg-2', latitude: 20, longitude: 20 },
       ];
-      
+
       mockPrismaService.route.findUnique.mockResolvedValue({
         id: 'route-1',
         startAddress: 'Rua Start',
@@ -85,17 +100,21 @@ describe('RoutesService', () => {
         estimatedTime: 30,
       });
 
-      mockPrismaService.route.update.mockResolvedValue({ status: RouteStatus.OPTIMIZED });
+      mockPrismaService.route.update.mockResolvedValue({
+        status: RouteStatus.OPTIMIZED,
+      });
 
       await routesService.optimize('route-1');
 
       expect(routeOptimizerService.optimize).toHaveBeenCalled();
-      expect(prismaService.route.update).toHaveBeenCalledWith(expect.objectContaining({
-        data: expect.objectContaining({
-          status: RouteStatus.OPTIMIZED,
-          totalDistance: 15.5,
-        })
-      }));
+      expect(prismaService.route.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: RouteStatus.OPTIMIZED,
+            totalDistance: 15.5,
+          }),
+        }),
+      );
     });
   });
 
@@ -104,13 +123,18 @@ describe('RoutesService', () => {
       mockPrismaService.route.findUnique.mockResolvedValue({ id: 'route-1' });
       mockPrismaService.driver.findUnique.mockResolvedValue(null);
 
-      await expect(routesService.assignDriver('route-1', 'driver-1')).rejects.toThrow(NotFoundException);
+      await expect(
+        routesService.assignDriver('route-1', 'driver-1'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('deve atribuir o motorista, atualizar rota para IN_PROGRESS e pacotes para IN_ROUTE', async () => {
       mockPrismaService.route.findUnique.mockResolvedValue({ id: 'route-1' });
       mockPrismaService.driver.findUnique.mockResolvedValue({ id: 'driver-1' });
-      mockPrismaService.route.update.mockResolvedValue({ id: 'route-1', status: RouteStatus.IN_PROGRESS });
+      mockPrismaService.route.update.mockResolvedValue({
+        id: 'route-1',
+        status: RouteStatus.IN_PROGRESS,
+      });
 
       await routesService.assignDriver('route-1', 'driver-1');
 
