@@ -1,10 +1,10 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import type { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import type { ReactNode } from 'react'
 
 interface PrivateRouteProps {
-  children: ReactNode;
-  roles?: string[];
+  children: ReactNode
+  roles?: string[]
 }
 
 /**
@@ -12,23 +12,23 @@ interface PrivateRouteProps {
  * Opcionalmente verifica roles permitidas.
  */
 export function PrivateRoute({ children, roles }: PrivateRouteProps) {
-  const { signed, loading, user } = useAuth();
+  const { signed, loading, user } = useAuth()
 
   if (loading) {
     return (
       <div className="loading-container">
         <div className="spinner" />
       </div>
-    );
+    )
   }
 
   if (!signed) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   if (roles && user && !roles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" replace />
   }
 
-  return <>{children}</>;
+  return <>{children}</>
 }

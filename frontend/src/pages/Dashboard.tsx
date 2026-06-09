@@ -1,69 +1,71 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { packagesService } from '../services/packages.service';
-import { routesService } from '../services/routes.service';
-import { driversService } from '../services/drivers.service';
-import '../pages/Panel.css';
+import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { packagesService } from '../services/packages.service'
+import { routesService } from '../services/routes.service'
+import { driversService } from '../services/drivers.service'
+import '../pages/Panel.css'
 
 /**
  * Página inicial do painel — resumo da operação logística.
  * Puxa dados reais de cada módulo para exibir os KPIs de resumo.
  */
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   const [stats, setStats] = useState({
     packages: 0,
     routes: 0,
     drivers: 0,
     delivered: 0,
-  });
-  const [recentPackages, setRecentPackages] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  })
+  const [recentPackages, setRecentPackages] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function loadDashboard() {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
         const [pkgResult, routeResult, driverResult] = await Promise.all([
           packagesService.findAll(1, 50).catch(() => ({ packages: [], meta: { total: 0 } })),
           routesService.findAll(1, 50).catch(() => ({ routes: [], meta: { total: 0 } })),
           driversService.findAll(1, 50).catch(() => ({ drivers: [], meta: { total: 0 } })),
-        ]);
+        ])
 
-        const pkgs = pkgResult.packages || [];
-        const delivered = pkgs.filter((p: any) => p.status === 'DELIVERED').length;
+        const pkgs = pkgResult.packages || []
+        const delivered = pkgs.filter((p: any) => p.status === 'DELIVERED').length
 
         setStats({
           packages: pkgResult.meta?.total || pkgs.length,
           routes: routeResult.meta?.total || (routeResult.routes || []).length,
           drivers: driverResult.meta?.total || (driverResult.drivers || []).length,
           delivered,
-        });
+        })
 
-        setRecentPackages(pkgs.slice(0, 5));
+        setRecentPackages(pkgs.slice(0, 5))
       } catch (error) {
-        console.error('Erro ao carregar dashboard:', error);
+        console.error('Erro ao carregar dashboard:', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    loadDashboard();
-  }, []);
+    loadDashboard()
+  }, [])
 
   const statusLabel: Record<string, string> = {
     PENDING: 'Pendente',
     IN_ROUTE: 'Em rota',
     DELIVERED: 'Entregue',
     RETURNED: 'Devolvido',
-  };
+  }
 
   if (isLoading) {
     return (
       <div className="page">
-        <div className="loading-container"><div className="spinner" /></div>
+        <div className="loading-container">
+          <div className="spinner" />
+        </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -139,7 +141,9 @@ export function Dashboard() {
               ) : (
                 recentPackages.map((pkg: any) => (
                   <tr key={pkg.id}>
-                    <td><code>{pkg.trackingCode}</code></td>
+                    <td>
+                      <code>{pkg.trackingCode}</code>
+                    </td>
                     <td>{pkg.recipientName}</td>
                     <td>{pkg.address}</td>
                     <td>
@@ -155,5 +159,5 @@ export function Dashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

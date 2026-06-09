@@ -1,19 +1,26 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import './Login.css';
+import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import './Login.css'
 
 /**
  * Ícone SVG do olho aberto (senha visível).
  */
 function EyeIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
-  );
+  )
 }
 
 /**
@@ -21,14 +28,21 @@ function EyeIcon() {
  */
 function EyeOffIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
       <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
       <path d="M14.12 14.12a3 3 0 11-4.24-4.24" />
       <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
-  );
+  )
 }
 
 /**
@@ -36,20 +50,27 @@ function EyeOffIcon() {
  */
 function AlertIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="12" />
       <line x1="12" y1="16" x2="12.01" y2="16" />
     </svg>
-  );
+  )
 }
 
 /**
  * Valida formato do e-mail com regex simples.
  */
 function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
 /**
@@ -57,81 +78,81 @@ function isValidEmail(email: string): boolean {
  * Funcionalidades: validação inline, toggle senha, caps lock, esqueci senha (modal), loading, Enter submit.
  */
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [capsLockOn, setCapsLockOn] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [capsLockOn, setCapsLockOn] = useState(false)
 
   // Erros individuais dos campos
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
 
   // Erro global da API
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState('')
 
   // Modal de esqueci senha
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotSent, setForgotSent] = useState(false);
-  const [forgotLoading, setForgotLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
+  const [forgotLoading, setForgotLoading] = useState(false)
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   /**
    * Valida os campos antes de submeter. Retorna true se tudo OK.
    */
   function validateFields(): boolean {
-    let valid = true;
+    let valid = true
 
     // Limpa erros anteriores
-    setEmailError('');
-    setPasswordError('');
-    setApiError('');
+    setEmailError('')
+    setPasswordError('')
+    setApiError('')
 
     if (!email.trim()) {
-      setEmailError('Informe seu e-mail');
-      valid = false;
+      setEmailError('Informe seu e-mail')
+      valid = false
     } else if (!isValidEmail(email)) {
-      setEmailError('Digite um e-mail válido');
-      valid = false;
+      setEmailError('Digite um e-mail válido')
+      valid = false
     }
 
     if (!password) {
-      setPasswordError('Informe sua senha');
-      valid = false;
+      setPasswordError('Informe sua senha')
+      valid = false
     }
 
-    return valid;
+    return valid
   }
 
   /**
    * Handler do submit (formulário ou Enter).
    */
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!validateFields()) return;
+    if (!validateFields()) return
 
-    setIsLoading(true);
-    setApiError('');
+    setIsLoading(true)
+    setApiError('')
 
     try {
-      await login(email, password);
-      navigate('/');
+      await login(email, password)
+      navigate('/')
     } catch (err: any) {
-      const status = err?.response?.status;
+      const status = err?.response?.status
       if (status === 401) {
-        setApiError('E-mail ou senha inválidos');
+        setApiError('E-mail ou senha inválidos')
       } else if (status === 400) {
-        const msg = err?.response?.data?.errors?.[0] || err?.response?.data?.message;
-        setApiError(msg || 'Preencha os campos obrigatórios');
+        const msg = err?.response?.data?.errors?.[0] || err?.response?.data?.message
+        setApiError(msg || 'Preencha os campos obrigatórios')
       } else {
-        setApiError('Não foi possível acessar sua conta. Verifique sua conexão.');
+        setApiError('Não foi possível acessar sua conta. Verifique sua conexão.')
       }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -140,7 +161,7 @@ export function Login() {
    */
   function handlePasswordKeyEvent(e: KeyboardEvent<HTMLInputElement>) {
     if (e.getModifierState) {
-      setCapsLockOn(e.getModifierState('CapsLock'));
+      setCapsLockOn(e.getModifierState('CapsLock'))
     }
   }
 
@@ -148,27 +169,26 @@ export function Login() {
    * Simula envio de recuperação de senha.
    */
   async function handleForgotSubmit() {
-    if (!forgotEmail.trim() || !isValidEmail(forgotEmail)) return;
-    setForgotLoading(true);
+    if (!forgotEmail.trim() || !isValidEmail(forgotEmail)) return
+    setForgotLoading(true)
 
     // Simula delay de envio (a integração real virá depois)
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500))
 
-    setForgotLoading(false);
-    setForgotSent(true);
+    setForgotLoading(false)
+    setForgotSent(true)
   }
 
   function closeForgotModal() {
-    setShowForgotModal(false);
-    setForgotEmail('');
-    setForgotSent(false);
-    setForgotLoading(false);
+    setShowForgotModal(false)
+    setForgotEmail('')
+    setForgotSent(false)
+    setForgotLoading(false)
   }
 
   return (
     <div className="login-container">
       <div className="login-card">
-
         {/* ===== Header com Logo ===== */}
         <header className="login-header">
           <div className="login-logo-icon">📦</div>
@@ -179,7 +199,6 @@ export function Login() {
 
         {/* ===== Formulário ===== */}
         <form onSubmit={handleSubmit} className="login-form" id="login-form" noValidate>
-
           {/* Alerta global de erro da API */}
           {apiError && (
             <div className="error-alert" id="login-error" role="alert">
@@ -196,7 +215,10 @@ export function Login() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setEmailError(''); }}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setEmailError('')
+                }}
                 placeholder="seu@email.com"
                 autoComplete="email"
                 autoFocus
@@ -215,7 +237,10 @@ export function Login() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setPasswordError(''); }}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setPasswordError('')
+                }}
                 onKeyDown={handlePasswordKeyEvent}
                 onKeyUp={handlePasswordKeyEvent}
                 placeholder="••••••"
@@ -244,19 +269,17 @@ export function Login() {
             <button
               type="button"
               className="forgot-password-link"
-              onClick={() => { setShowForgotModal(true); setForgotEmail(email); }}
+              onClick={() => {
+                setShowForgotModal(true)
+                setForgotEmail(email)
+              }}
             >
               Esqueci minha senha
             </button>
           </div>
 
           {/* Botão Entrar */}
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={isLoading}
-            id="login-submit"
-          >
+          <button type="submit" className="btn-primary" disabled={isLoading} id="login-submit">
             {isLoading ? (
               <>
                 <div className="spinner"></div>
@@ -277,8 +300,7 @@ export function Login() {
               <>
                 <h2>Recuperar senha</h2>
                 <p>
-                  Informe seu e-mail cadastrado e enviaremos as instruções
-                  para redefinir sua senha.
+                  Informe seu e-mail cadastrado e enviaremos as instruções para redefinir sua senha.
                 </p>
 
                 <div className="input-group">
@@ -314,8 +336,8 @@ export function Login() {
               <>
                 <h2>E-mail enviado ✓</h2>
                 <p>
-                  Se o e-mail <strong>{forgotEmail}</strong> estiver cadastrado,
-                  você receberá as instruções em instantes.
+                  Se o e-mail <strong>{forgotEmail}</strong> estiver cadastrado, você receberá as
+                  instruções em instantes.
                 </p>
                 <div className="modal-actions">
                   <button type="button" className="btn-modal-primary" onClick={closeForgotModal}>
@@ -328,5 +350,5 @@ export function Login() {
         </div>
       )}
     </div>
-  );
+  )
 }

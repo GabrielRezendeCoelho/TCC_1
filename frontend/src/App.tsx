@@ -1,13 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { PageContainer, PrivateRoute } from './components/layout';
-import { Login } from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
-import { Packages } from './pages/Packages';
-import { Routes as RoutesPage } from './pages/Routes';
-import { Drivers } from './pages/Drivers';
-import { Users } from './pages/Users';
-import './index.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import { PageContainer, PrivateRoute } from './components/layout'
+import { Login } from './pages/Login'
+import { Dashboard } from './pages/Dashboard'
+import { Packages } from './pages/Packages'
+import { Routes as RoutesPage } from './pages/Routes'
+import { Drivers } from './pages/Drivers'
+import { Users } from './pages/Users'
+import './index.css'
 
 /**
  * Componente raiz do TrackGo Web — define rotas e autenticação.
@@ -40,7 +40,7 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App
