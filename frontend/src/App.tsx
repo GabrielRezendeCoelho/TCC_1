@@ -2,9 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { PageContainer, PrivateRoute } from './components/layout'
 import { Login } from './pages/Login'
+import { Register } from './pages/Register'
 import { Dashboard } from './pages/Dashboard'
 import { Packages } from './pages/Packages'
-import { Routes as RoutesPage } from './pages/Routes'
 import { Drivers } from './pages/Drivers'
 import { Users } from './pages/Users'
 import './index.css'
@@ -19,6 +19,7 @@ function App() {
         <Routes>
           {/* Rota pública */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Rotas protegidas com layout */}
           <Route
@@ -30,7 +31,6 @@ function App() {
           >
             <Route path="/" element={<Dashboard />} />
             <Route path="/packages" element={<Packages />} />
-            <Route path="/routes" element={<RoutesPage />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/users" element={<Users />} />
           </Route>

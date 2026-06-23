@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { driversService } from '../services/drivers.service'
 import { api } from '../services/api'
 import type { Driver } from '../types'
@@ -10,6 +12,12 @@ import '../pages/Crud.css'
  * Página CRUD de Motoristas com criação integrada de usuário e soft/hard delete.
  */
 export function Drivers() {
+  const { user } = useAuth()
+  
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />
+  }
+
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -212,7 +220,7 @@ export function Drivers() {
                             title="Editar"
                             onClick={() => openEdit(driver)}
                           >
-                            ✏️
+                            Editar
                           </button>
                           {isActive ? (
                             <button
@@ -221,7 +229,7 @@ export function Drivers() {
                               onClick={() => setConfirmAction({ driver, type: 'deactivate' })}
                               style={{ color: '#D97706' }}
                             >
-                              ⛔
+                              Desativar
                             </button>
                           ) : (
                             <button
@@ -230,7 +238,7 @@ export function Drivers() {
                               onClick={() => setConfirmAction({ driver, type: 'activate' })}
                               style={{ color: '#10B981' }}
                             >
-                              ✅
+                              Ativar
                             </button>
                           )}
                           <button
@@ -238,7 +246,7 @@ export function Drivers() {
                             title="Excluir"
                             onClick={() => setConfirmAction({ driver, type: 'delete' })}
                           >
-                            🗑️
+                            Excluir
                           </button>
                         </div>
                       </td>
@@ -325,10 +333,10 @@ export function Drivers() {
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h2>
               {confirmAction.type === 'deactivate'
-                ? '⛔ Desativar Motorista'
+                ? 'Desativar Motorista'
                 : confirmAction.type === 'activate'
-                  ? '✅ Ativar Motorista'
-                  : '🗑️ Excluir Permanentemente'}
+                  ? 'Ativar Motorista'
+                  : 'Excluir Permanentemente'}
             </h2>
             <p className="confirm-text">
               {confirmAction.type === 'deactivate' ? (

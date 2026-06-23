@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { api } from '../services/api'
 import type { User } from '../types'
 import '../pages/Panel.css'
@@ -8,6 +10,12 @@ import '../pages/Crud.css'
  * Página CRUD de Usuários com Desativar (soft) e Excluir (hard delete).
  */
 export function Users() {
+  const { user } = useAuth()
+  
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />
+  }
+
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -15,7 +23,7 @@ export function Users() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [confirmAction, setConfirmAction] = useState<{
     user: User
-    type: 'deactivate' | 'delete'
+    type: 'deactivate' | 'delete' | 'activate'
   } | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ msg: string; type: string } | null>(null)
@@ -184,7 +192,7 @@ export function Users() {
                           title="Editar"
                           onClick={() => openEdit(u)}
                         >
-                          ✏️
+                          Editar
                         </button>
                         {u.isActive ? (
                           <button
@@ -195,7 +203,7 @@ export function Users() {
                             }
                             style={{ color: '#D97706' }}
                           >
-                            ⛔
+                            Desativar
                           </button>
                         ) : (
                           <button
@@ -204,7 +212,7 @@ export function Users() {
                             onClick={() => setConfirmAction({ user: u, type: 'activate' as const })}
                             style={{ color: '#10B981' }}
                           >
-                            ✅
+                            Ativar
                           </button>
                         )}
                         <button
@@ -212,7 +220,7 @@ export function Users() {
                           title="Excluir permanentemente"
                           onClick={() => setConfirmAction({ user: u, type: 'delete' as const })}
                         >
-                          🗑️
+                          Excluir
                         </button>
                       </div>
                     </td>
@@ -291,10 +299,10 @@ export function Users() {
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h2>
               {confirmAction.type === 'deactivate'
-                ? '⛔ Desativar Usuário'
+                ? 'Desativar Usuário'
                 : confirmAction.type === 'activate'
-                  ? '✅ Ativar Usuário'
-                  : '🗑️ Excluir Permanentemente'}
+                  ? 'Ativar Usuário'
+                  : 'Excluir Permanentemente'}
             </h2>
             <p className="confirm-text">
               {confirmAction.type === 'deactivate' ? (

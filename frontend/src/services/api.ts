@@ -31,4 +31,27 @@ api.interceptors.request.use(
   },
 )
 
+/**
+ * Interceptor de Respostas:
+ * Trata automaticamente erros 401 (token expirado ou inválido).
+ * Limpa o localStorage e redireciona para a tela de login.
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Não redireciona se já estiver na tela de login
+      const isLoginRequest = error.config?.url?.includes('/auth/login')
+      if (!isLoginRequest) {
+        console.warn('[TrackGo] Token expirado ou inválido. Redirecionando para login...')
+        localStorage.removeItem('@TrackGo:token')
+        localStorage.removeItem('@TrackGo:user')
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  },
+)
+
 export default api
+

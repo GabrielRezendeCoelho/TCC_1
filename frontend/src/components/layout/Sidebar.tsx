@@ -67,19 +67,22 @@ export function Sidebar() {
     navigate('/login')
   }
 
-  const navItems = [
-    { path: '/', label: 'Dashboard', emoji: '📊' },
-    { path: '/packages', label: 'Entregas', emoji: '📦' },
-    { path: '/routes', label: 'Rotas', emoji: '🗺️' },
-    { path: '/drivers', label: 'Motoristas', emoji: '🚗' },
-    { path: '/users', label: 'Usuários', emoji: '👥' },
+  const allNavItems = [
+    { path: '/', label: 'Dashboard', emoji: '' },
+    { path: '/packages', label: 'Entregas', emoji: '' },
+    { path: '/drivers', label: 'Motoristas', emoji: '' },
+    { path: '/users', label: 'Usuários', emoji: '' },
   ]
+
+  const navItems = user?.role === 'ADMIN' 
+    ? allNavItems 
+    : allNavItems.filter(item => item.path === '/' || item.path === '/packages')
 
   return (
     <>
       <aside className="sidebar" id="sidebar">
         <div className="sidebar-header">
-          <div className="sidebar-logo-icon">📦</div>
+          <div className="sidebar-logo-icon">TG</div>
           <span className="sidebar-logo">TrackGo</span>
         </div>
 
@@ -129,7 +132,7 @@ export function Sidebar() {
                 />
               </div>
               <div className="form-group">
-                <label>📍 Endereço da Base (ponto de partida das rotas)</label>
+                <label>Endereço da Base (ponto de partida das rotas)</label>
                 <input
                   value={profileForm.baseAddress}
                   onChange={(e) => setProfileForm({ ...profileForm, baseAddress: e.target.value })}
@@ -159,7 +162,7 @@ export function Sidebar() {
                 </div>
               </div>
               <p style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                ⚠️ O endereço da base é usado como ponto de partida para gerar rotas inteligentes.
+                O endereço da base é usado como ponto de partida para gerar rotas inteligentes.
               </p>
             </div>
             <div className="modal-actions">

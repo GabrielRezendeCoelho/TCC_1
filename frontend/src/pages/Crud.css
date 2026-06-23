@@ -6,8 +6,8 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,10 +19,11 @@
 /* ===== Card do Modal ===== */
 .modal-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
   background: var(--color-surface);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-floating);
@@ -74,8 +75,8 @@
 .form-group textarea {
   padding: 0.65rem 0.85rem;
   border-radius: var(--border-radius-sm);
-  border: 1.5px solid #E5E7EB;
-  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-background-app);
   color: var(--color-text-title);
   font-size: 0.875rem;
   transition: all var(--transition-base);
@@ -86,7 +87,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
   outline: none;
 }
 
@@ -105,8 +106,8 @@
 .btn-cancel {
   padding: 0.6rem 1.25rem;
   border-radius: var(--border-radius-sm);
-  border: 1.5px solid #E5E7EB;
-  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text-body);
   font-weight: 500;
   font-size: 0.875rem;
@@ -115,15 +116,15 @@
 }
 
 .btn-cancel:hover {
-  background: var(--color-surface-hover);
-  border-color: #D1D5DB;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btn-save {
   padding: 0.6rem 1.25rem;
   border-radius: var(--border-radius-sm);
   border: none;
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #6d28d9 100%);
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
@@ -132,10 +133,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-save:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .btn-save:disabled {
@@ -164,43 +167,47 @@
   padding: 0.6rem 1.25rem;
   border-radius: var(--border-radius-sm);
   border: none;
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-new:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* ===== Botões inline na Tabela ===== */
 .table-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn-icon {
-  width: 32px;
-  height: 32px;
+  padding: 0.35rem 0.65rem;
   border-radius: var(--border-radius-sm);
-  border: 1px solid #E5E7EB;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--color-surface);
+  color: var(--color-text-body);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
   transition: all var(--transition-base);
 }
 
 .btn-icon:hover {
   background: var(--color-surface-hover);
+  color: var(--color-text-title);
 }
 
 .btn-icon.edit:hover {
@@ -211,6 +218,17 @@
 .btn-icon.delete:hover {
   border-color: var(--color-error);
   color: var(--color-error);
+}
+
+.btn-icon.deliver {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.btn-icon.deliver:hover {
+  border-color: #059669;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.18);
+  transform: scale(1.1);
 }
 
 /* ===== Toast de Sucesso ===== */

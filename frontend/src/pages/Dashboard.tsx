@@ -25,6 +25,12 @@ export function Dashboard() {
     async function loadDashboard() {
       setIsLoading(true)
       try {
+        if (user?.role !== 'ADMIN') {
+          setStats({ packages: 0, routes: 0, drivers: 0, delivered: 0 })
+          setRecentPackages([])
+          return
+        }
+
         const [pkgResult, routeResult, driverResult] = await Promise.all([
           packagesService.findAll(1, 50).catch(() => ({ packages: [], meta: { total: 0 } })),
           routesService.findAll(1, 50).catch(() => ({ routes: [], meta: { total: 0 } })),
@@ -82,7 +88,7 @@ export function Dashboard() {
       {/* KPI Cards */}
       <div className="dashboard-cards">
         <div className="card card--stat" id="stat-packages">
-          <span className="card-icon">📦</span>
+          <span className="card-icon">PKG</span>
           <div className="card-content">
             <h3>Pacotes</h3>
             <p className="card-value">{stats.packages}</p>
@@ -91,7 +97,7 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-routes">
-          <span className="card-icon">🗺️</span>
+          <span className="card-icon">RTA</span>
           <div className="card-content">
             <h3>Rotas</h3>
             <p className="card-value">{stats.routes}</p>
@@ -100,7 +106,7 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-drivers">
-          <span className="card-icon">🚗</span>
+          <span className="card-icon">MOT</span>
           <div className="card-content">
             <h3>Motoristas</h3>
             <p className="card-value">{stats.drivers}</p>
@@ -109,7 +115,7 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-delivered">
-          <span className="card-icon">✅</span>
+          <span className="card-icon">OK</span>
           <div className="card-content">
             <h3>Entregas</h3>
             <p className="card-value">{stats.delivered}</p>
@@ -120,7 +126,7 @@ export function Dashboard() {
 
       {/* Últimos Pacotes */}
       <div className="dashboard-section">
-        <h2>📋 Últimos Pacotes</h2>
+        <h2>Últimos Pacotes</h2>
         <div className="table-container">
           <table className="table">
             <thead>

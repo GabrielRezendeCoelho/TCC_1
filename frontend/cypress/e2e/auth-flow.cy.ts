@@ -2,7 +2,6 @@
 
 describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
   beforeEach(() => {
-    // Limpa o estado para garantir testes isolados
     cy.clearLocalStorage()
   })
 
@@ -12,7 +11,6 @@ describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
   })
 
   it('Deve mostrar mensagem de erro com credenciais inválidas', () => {
-    // Mock do erro 401
     cy.intercept('POST', '**/api/auth/login', {
       statusCode: 401,
       body: { message: 'Unauthorized' },
@@ -26,12 +24,10 @@ describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
 
     cy.wait('@loginFail')
 
-    // Verifica a mensagem de erro amigável definida no componente React
     cy.contains(/E-mail ou senha inválidos/i).should('be.visible')
   })
 
   it('Deve logar o usuário com sucesso e apresentar Painel Operacional', () => {
-    // Mock do sucesso no login
     cy.intercept('POST', '**/api/auth/login', {
       statusCode: 200,
       body: {
@@ -55,13 +51,11 @@ describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
 
     cy.wait('@loginSuccess')
 
-    // Deve redirecionar e mostrar elementos do Dashboard
     cy.url().should('not.include', '/login')
     cy.contains('Dashboard').should('be.visible')
   })
 
   it('Deve deslogar o admin com sucesso', () => {
-    // Mock do profile para quando o app carregar
     cy.intercept('GET', '**/api/auth/profile', {
       statusCode: 200,
       body: {
@@ -69,7 +63,10 @@ describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
       },
     }).as('getProfile')
 
-    // Injeta o estado de login diretamente no localStorage antes de visitar a página
+    cy.intercept('GET', '**/api/packages*', { statusCode: 200, body: { data: [], total: 0 } })
+    cy.intercept('GET', '**/api/drivers*', { statusCode: 200, body: { data: [], total: 0 } })
+    cy.intercept('GET', '**/api/routes*', { statusCode: 200, body: { data: [], total: 0 } })
+
     cy.visit('/', {
       onBeforeLoad(win) {
         win.localStorage.setItem('@TrackGo:token', 'fake.jwt.token')
@@ -85,13 +82,10 @@ describe('TrackGo - Fluxos Operacionais E2E (Login e Rotas)', () => {
       },
     })
 
-    // Garante que o usuário está "logado" na UI
     cy.contains('Admin TrackGo').should('be.visible')
 
-    // Aciona o Logout
     cy.get('#logout-button').click()
 
-    // Deve limpar o estado e redirecionar para o login
     cy.url().should('include', '/login')
     cy.window().its('localStorage').invoke('getItem', '@TrackGo:token').should('be.null')
   })

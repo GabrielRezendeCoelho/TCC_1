@@ -191,7 +191,7 @@ export function Login() {
       <div className="login-card">
         {/* ===== Header com Logo ===== */}
         <header className="login-header">
-          <div className="login-logo-icon">📦</div>
+          <div className="login-logo-icon">TG</div>
           <h1 className="login-logo">TrackGo</h1>
           <p className="login-title">Entrar</p>
           <p className="login-subtitle">Acesse sua conta para continuar</p>
@@ -260,12 +260,12 @@ export function Login() {
             </div>
             {passwordError && <span className="field-error">{passwordError}</span>}
             {capsLockOn && !passwordError && (
-              <span className="caps-warning">⚠ Caps Lock está ativado</span>
+              <span className="caps-warning">Caps Lock está ativado</span>
             )}
           </div>
 
-          {/* Link Esqueci Senha */}
-          <div className="forgot-password-row">
+          {/* Link Esqueci Senha / Cadastro */}
+          <div className="forgot-password-row" style={{ display: 'flex', justifyContent: 'space-between' }}>
             <button
               type="button"
               className="forgot-password-link"
@@ -275,6 +275,13 @@ export function Login() {
               }}
             >
               Esqueci minha senha
+            </button>
+            <button
+              type="button"
+              className="forgot-password-link"
+              onClick={() => navigate('/register')}
+            >
+              Criar conta
             </button>
           </div>
 
