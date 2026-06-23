@@ -32,4 +32,8 @@ export class CreatePackageDto {
   @IsOptional()
   @IsString()
   clientId?: string;
+
+  @IsOptional()
+  @IsString()
+  routeId?: string;
 }

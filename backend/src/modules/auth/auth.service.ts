@@ -27,18 +27,40 @@ export class AuthService {
       throw new ConflictException('E-mail já cadastrado');
     }
 
+    if (dto.cpf) {
+      const existingCpf = await this.prisma.user.findUnique({
+        where: { cpf: dto.cpf },
+      });
+      if (existingCpf) {
+        throw new ConflictException('CPF já cadastrado');
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
       data: {
         name: dto.name,
         email: dto.email,
+        cpf: dto.cpf,
         password: hashedPassword,
         role: dto.role,
       },
     });
 
-    return this.generateToken(user.id, user.email, user.role);
+    if (dto.role === 'DRIVER') {
+      const defaultVehicle = await this.prisma.vehicle.findFirst();
+      await this.prisma.driver.create({
+        data: {
+          licenseNumber: dto.cpf || `CNH-${user.id.slice(0, 8)}`,
+          phone: '(44) 99999-9999',
+          userId: user.id,
+          vehicleId: defaultVehicle ? defaultVehicle.id : null,
+        },
+      });
+    }
+
+    return this.generateToken(user.id, user.email, user.role, user.name);
   }
 
   /**
@@ -63,7 +85,7 @@ export class AuthService {
       throw new UnauthorizedException('Usuário desativado');
     }
 
-    return this.generateToken(user.id, user.email, user.role);
+    return this.generateToken(user.id, user.email, user.role, user.name);
   }
 
   /**
@@ -122,12 +144,12 @@ export class AuthService {
   /**
    * Gera o token JWT com payload padronizado.
    */
-  private generateToken(userId: string, email: string, role: string) {
+  private generateToken(userId: string, email: string, role: string, name: string) {
     const payload = { sub: userId, email, role };
 
     return {
       accessToken: this.jwtService.sign(payload),
-      user: { id: userId, email, role },
+      user: { id: userId, name, email, role },
     };
   }
 }

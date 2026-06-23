@@ -57,6 +57,7 @@ enum OccurrenceSeverity {
 model User {
   id          String   @id @default(uuid())
   name        String
+  cpf         String?  @unique
   email       String   @unique
   password    String
   role        Role     @default(DRIVER)
@@ -123,7 +124,7 @@ model Vehicle {
 
 model Package {
   id             String        @id @default(uuid())
-  trackingCode   String        @unique @default(uuid())
+  trackingCode   String        @default(uuid())
   recipientName  String
   recipientPhone String?
   address        String

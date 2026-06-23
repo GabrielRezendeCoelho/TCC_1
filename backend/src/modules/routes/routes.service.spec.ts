@@ -69,6 +69,13 @@ describe('RoutesService', () => {
     });
 
     it('deve rejeitar se a rota tiver menos de 2 pacotes com coordenadas mapeadas', async () => {
+      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue({
+        id: 'user-id',
+        email: 'driver@test.com',
+        role: Role.DRIVER,
+        baseLat: -23.5505,
+        baseLng: -46.6333,
+      } as any);
       mockPrismaService.route.findUnique.mockResolvedValue({
         id: 'route-1',
         startAddress: 'Rua A',
@@ -83,6 +90,14 @@ describe('RoutesService', () => {
     });
 
     it('deve chamar o otimizador e atualizar a rota com o status OPTIMIZED em caso de sucesso', async () => {
+      jest.spyOn(prismaService.user, 'findUnique').mockResolvedValue({
+        id: 'user-id',
+        email: 'driver@test.com',
+        role: 'DRIVER' as any,
+        baseLat: -23.5505,
+        baseLng: -46.6333,
+      } as any);
+
       const mockPackages = [
         { id: 'pkg-1', latitude: 10, longitude: 10 },
         { id: 'pkg-2', latitude: 20, longitude: 20 },

@@ -32,13 +32,23 @@ export class RoutesService {
   /**
    * Lista rotas com paginação e busca.
    */
-  async findAll(query: PaginationDto) {
+  async findAll(query: PaginationDto, currentUser?: { id: string; role: string }) {
     const { page = 1, limit = 20, search } = query;
     const skip = (page - 1) * limit;
 
-    const where = search
+    let where: any = search
       ? { name: { contains: search, mode: 'insensitive' as const } }
       : {};
+
+    if (currentUser && currentUser.role === 'DRIVER') {
+      where = {
+        ...where,
+        OR: [
+          { createdById: currentUser.id },
+          { driver: { userId: currentUser.id } },
+        ],
+      };
+    }
 
     const [routes, total] = await Promise.all([
       this.prisma.route.findMany({
@@ -48,6 +58,7 @@ export class RoutesService {
         include: {
           driver: { include: { user: { select: { name: true } } } },
           _count: { select: { packages: true } },
+          packages: { select: { status: true } },
         },
         orderBy: { date: 'desc' },
       }),
@@ -68,7 +79,7 @@ export class RoutesService {
       where: { id },
       include: {
         driver: { include: { user: { select: { name: true, email: true } } } },
-        createdBy: { select: { name: true, email: true } },
+        createdBy: { select: { name: true, email: true, baseAddress: true, baseLat: true, baseLng: true } },
         packages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -146,27 +157,89 @@ export class RoutesService {
   async optimize(id: string) {
     const route = await this.findOne(id);
 
-    if (!route.startAddress) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: route.createdById },
+    });
+
+    if (!user || !user.baseLat || !user.baseLng) {
       throw new BadRequestException(
-        'Endereço de partida é obrigatório para otimizar a rota',
+        'O usuário criador da rota precisa cadastrar o endereço da base no seu perfil antes de otimizar a rota.',
       );
+    }
+
+    // Se o usuário está em outra região, mas os pacotes estão com coordenadas fictícias de São Paulo,
+    // ou não têm coordenadas, ou estão muito longe da base, vamos re-geocodificar ou aproximá-los da base automaticamente.
+    const isUserInSP = user.baseLat >= -23.65 && user.baseLat <= -23.45 && user.baseLng >= -46.75 && user.baseLng <= -46.53;
+
+    const parts = user.baseAddress ? user.baseAddress.split('-') : [];
+    const cityState = parts.length >= 2 ? parts[1].replace('/', ', ').trim() : '';
+    const cityName = cityState.split(',')[0].trim().toLowerCase();
+
+    for (const pkg of route.packages) {
+      const isPkgInSP = pkg.latitude && pkg.latitude >= -23.65 && pkg.latitude <= -23.45 && pkg.longitude && pkg.longitude >= -46.75 && pkg.longitude <= -46.53;
+      
+      const isPkgFarFromBase = pkg.latitude && pkg.longitude && 
+        (Math.abs(pkg.latitude - user.baseLat) > 1.0 || Math.abs(pkg.longitude - user.baseLng) > 1.0);
+
+      if ((isPkgInSP && !isUserInSP) || pkg.latitude === null || pkg.longitude === null || (isPkgFarFromBase && cityState)) {
+        try {
+          let addressQuery = pkg.address;
+          if (cityState && cityName && !pkg.address.toLowerCase().includes(cityName)) {
+            addressQuery = `${pkg.address}, ${cityState}`;
+          }
+
+          const query = encodeURIComponent(addressQuery);
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&countrycodes=br`,
+            {
+              headers: {
+                'User-Agent': 'TrackGo-Backend/1.0',
+              },
+            }
+          );
+          const results = (await response.json()) as any[];
+          if (results && results.length > 0) {
+            const newLat = parseFloat(results[0].lat);
+            const newLng = parseFloat(results[0].lon);
+            
+            await this.prisma.package.update({
+              where: { id: pkg.id },
+              data: { latitude: newLat, longitude: newLng },
+            });
+            pkg.latitude = newLat;
+            pkg.longitude = newLng;
+          } else {
+            // Fallback: coloca próximo à base do criador/motorista
+            const newLat = user.baseLat + (Math.random() - 0.5) * 0.01;
+            const newLng = user.baseLng + (Math.random() - 0.5) * 0.01;
+            
+            await this.prisma.package.update({
+              where: { id: pkg.id },
+              data: { latitude: newLat, longitude: newLng },
+            });
+            pkg.latitude = newLat;
+            pkg.longitude = newLng;
+          }
+        } catch (err) {
+          console.error(`Erro ao corrigir coordenadas do pacote ${pkg.id}:`, err);
+        }
+      }
     }
 
     const packagesWithCoords = route.packages.filter(
       (pkg) => pkg.latitude !== null && pkg.longitude !== null,
     );
 
-    if (packagesWithCoords.length < 2) {
+    if (packagesWithCoords.length === 0) {
       throw new BadRequestException(
-        'São necessários pelo menos 2 pacotes com coordenadas para otimizar',
+        'São necessários pacotes com coordenadas para otimizar',
       );
     }
 
-    // Para simplificação, usa as coordenadas do primeiro pacote como ponto de partida
-    // Em produção, o startAddress seria geocodificado
+    // Usa as coordenadas do endereço da base do criador como ponto de partida
     const startPoint = {
-      latitude: packagesWithCoords[0].latitude!,
-      longitude: packagesWithCoords[0].longitude!,
+      latitude: user.baseLat,
+      longitude: user.baseLng,
     };
 
     const waypoints = packagesWithCoords.map((pkg) => ({

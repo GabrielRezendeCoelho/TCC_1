@@ -29,8 +29,11 @@ export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
   @Get()
-  findAll(@Query() query: PaginationDto) {
-    return this.routesService.findAll(query);
+  findAll(
+    @Query() query: PaginationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.routesService.findAll(query, user);
   }
 
   @Get(':id')
@@ -39,19 +42,19 @@ export class RoutesController {
   }
 
   @Post()
-  @Roles(Role.ADMIN, Role.OPERATOR)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.DRIVER)
   create(@Body() dto: CreateRouteDto, @CurrentUser('id') userId: string) {
     return this.routesService.create(dto, userId);
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.OPERATOR)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.DRIVER)
   update(@Param('id') id: string, @Body() dto: UpdateRouteDto) {
     return this.routesService.update(id, dto);
   }
 
   @Post(':id/optimize')
-  @Roles(Role.ADMIN, Role.OPERATOR)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.DRIVER)
   optimize(@Param('id') id: string) {
     return this.routesService.optimize(id);
   }
@@ -75,7 +78,7 @@ export class RoutesController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.DRIVER)
   remove(@Param('id') id: string) {
     return this.routesService.remove(id);
   }

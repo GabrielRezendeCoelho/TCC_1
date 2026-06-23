@@ -154,6 +154,17 @@ export class UsersService {
   async hardDelete(id: string) {
     await this.findOne(id);
 
+    // Remove registros que bloqueiam a exclusão (sem cascade no schema)
+    await this.prisma.occurrence.deleteMany({ where: { reportedById: id } });
+    await this.prisma.route.deleteMany({ where: { createdById: id } });
+
+    // Se o usuário for um cliente, ele pode ter pacotes atrelados que bloqueiam a exclusão
+    const client = await this.prisma.client.findUnique({ where: { userId: id } });
+    if (client) {
+      await this.prisma.package.deleteMany({ where: { clientId: client.id } });
+    }
+
+    // User.delete vai cascatear driver/client automaticamente
     return this.prisma.user.delete({ where: { id } });
   }
 }

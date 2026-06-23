@@ -6,8 +6,8 @@ export class LockedLoggerService {
   private readonly logger: Logger;
   private readonly mutex = new Mutex();
 
-  constructor(context: string = 'LockedLogger') {
-    this.logger = new Logger(context);
+  constructor() {
+    this.logger = new Logger('LockedLogger');
   }
 
   async logInfo(

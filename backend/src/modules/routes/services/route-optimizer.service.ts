@@ -66,10 +66,10 @@ export class RouteOptimizerService implements IRouteOptimizer {
 
       const data = (await response.json()) as OsrmResponse;
 
-      if (data.code !== 'Ok') {
+      if (data.code !== 'Ok' || !data.trips || !data.waypoints || data.trips.length === 0) {
         await this.lockedLogger.logWarn(
           'RouteOptimizer',
-          `OSRM retornou código não-OK: ${data.code}. Utilizando fallback.`,
+          `OSRM retornou código não-OK ou dados incompletos: ${data.code}. Utilizando fallback.`,
           { osrmCode: data.code },
         );
         return this.fallbackOrder(waypoints);
@@ -77,14 +77,11 @@ export class RouteOptimizerService implements IRouteOptimizer {
 
       const trip = data.trips[0];
 
-      // Reordena waypoints com base na sequência otimizada do OSRM
-      // O índice 0 é o ponto de partida, os waypoints começam do índice 1
+      // Reordena waypoints com base na sequência otimizada do OSRM.
+      // Os waypoints no JSON retornado pela API OSRM Trip já estão na ordem otimizada de visitação.
+      // O primeiro elemento (índice 0) é o ponto de partida, os próximos são as entregas.
       const waypointIndices = data.waypoints
         .slice(1)
-        .sort(
-          (a: { waypoint_index: number }, b: { waypoint_index: number }) =>
-            a.waypoint_index - b.waypoint_index,
-        )
         .map((wp: { waypoint_index: number }) => wp.waypoint_index - 1);
 
       const orderedWaypoints = waypointIndices.map(
