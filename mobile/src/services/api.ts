@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * Usando o IP da máquina na rede local permite ao emulador ou dispositivo físico bater na API.
  */
 // TODO: Substitua pelo seu IP local atual
-const BASE_URL = 'http://192.168.0.x:3000/api'; 
+const BASE_URL = 'http://192.168.0.105:3000/api'; 
 
 const api = axios.create({
   baseURL: BASE_URL,

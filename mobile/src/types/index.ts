@@ -24,6 +24,7 @@ export interface Package {
   latitude?: number;
   longitude?: number;
   status: PackageStatus;
+  createdAt?: string;
 }
 
 export interface DeliveryRoute {

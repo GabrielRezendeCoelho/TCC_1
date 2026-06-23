@@ -7,8 +7,34 @@ interface Props {
   onPress: () => void;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Rascunho',
+  OPTIMIZED: 'Otimizada',
+  IN_PROGRESS: 'Em Progresso',
+  COMPLETED: 'Finalizada',
+};
+
 export function RouteCard({ route, onPress }: Props) {
   const isCompleted = route.status === 'COMPLETED';
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'COMPLETED':
+        return { badge: styles.badgeCompleted, text: styles.badgeTextCompleted };
+      case 'IN_PROGRESS':
+        return { badge: styles.badgeInProgress, text: styles.badgeTextInProgress };
+      case 'OPTIMIZED':
+        return { badge: styles.badgeOptimized, text: styles.badgeTextOptimized };
+      default:
+        return { badge: styles.badgeDraft, text: styles.badgeTextDraft };
+    }
+  };
+
+  const statusStyle = getStatusStyles(route.status);
+
+  const packages = route.packages || [];
+  const completedCount = packages.filter(p => p.status === 'DELIVERED' || p.status === 'RETURNED').length;
+  const totalCount = packages.length || route._count?.packages || 0;
 
   return (
     <TouchableOpacity 
@@ -18,17 +44,17 @@ export function RouteCard({ route, onPress }: Props) {
     >
       <View style={styles.header}>
         <Text style={styles.title}>{route.name}</Text>
-        <View style={[styles.badge, isCompleted ? styles.badgeCompleted : null]}>
-          <Text style={styles.badgeText}>
-            {isCompleted ? 'Finalizada' : route.status}
+        <View style={[styles.badge, statusStyle.badge]}>
+          <Text style={[styles.badgeText, statusStyle.text]}>
+            {STATUS_LABELS[route.status] || route.status}
           </Text>
         </View>
       </View>
       
       <View style={styles.content}>
         <Text style={styles.info}>📅 {new Date(route.date).toLocaleDateString('pt-BR')}</Text>
-        <Text style={styles.info}>📦 {route._count?.packages || 0} pacotes</Text>
-        {route.totalDistance && <Text style={styles.info}>🗺️ {route.totalDistance} km</Text>}
+        <Text style={styles.info}>📦 {completedCount} de {totalCount} pacotes</Text>
+        {!!route.totalDistance && <Text style={styles.info}>🗺️ {route.totalDistance.toFixed(1)} km</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -58,19 +84,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   badge: {
-    backgroundColor: '#3b82f620',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+  },
+  badgeDraft: {
+    backgroundColor: '#64748b20',
+  },
+  badgeOptimized: {
+    backgroundColor: '#f59e0b20',
+  },
+  badgeInProgress: {
+    backgroundColor: '#6366f120',
   },
   badgeCompleted: {
     backgroundColor: '#22c55e20',
   },
   badgeText: {
-    color: '#3b82f6',
     fontSize: 10,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  badgeTextDraft: {
+    color: '#64748b',
+  },
+  badgeTextOptimized: {
+    color: '#f59e0b',
+  },
+  badgeTextInProgress: {
+    color: '#6366f1',
+  },
+  badgeTextCompleted: {
+    color: '#22c55e',
   },
   content: {
     flexDirection: 'row',
