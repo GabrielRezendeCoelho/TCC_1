@@ -40,17 +40,7 @@ enum RouteStatus {
   COMPLETED
 }
 
-enum DeliveryStatus {
-  SUCCESS
-  FAILED
-}
 
-enum OccurrenceSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
 
 // --- Models ---
 
@@ -71,8 +61,6 @@ model User {
   driver        Driver?
   client        Client?
   routesCreated Route[]      @relation("CreatedByUser")
-  auditLogs     AuditLog[]
-  occurrences   Occurrence[] @relation("ReportedByUser")
 
   @@map("users")
 }
@@ -135,13 +123,10 @@ model Package {
   
   clientId       String
   client         Client        @relation(fields: [clientId], references: [id])
-
   routeId        String?
   route          Route?        @relation(fields: [routeId], references: [id], onDelete: SetNull)
   
   trackingEvents Tracking[]
-  deliveryProof  DeliveryProof?
-  occurrences    Occurrence[]
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -166,7 +151,6 @@ model Route {
   createdBy       User        @relation("CreatedByUser", fields: [createdById], references: [id])
   
   packages        Package[]
-  occurrences     Occurrence[]
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -187,53 +171,4 @@ model Tracking {
   @@map("tracking_events")
 }
 
-model DeliveryProof {
-  id              String         @id @default(uuid())
-  packageId       String         @unique
-  package         Package        @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  status          DeliveryStatus
-  signatureUrl    String?
-  photoUrl        String?
-  receiverName    String?
-  receiverDoc     String?        // Document of the person who received it
-  deliveryDate    DateTime       @default(now())
-  notes           String?
 
-  @@map("delivery_proofs")
-}
-
-model Occurrence {
-  id          String             @id @default(uuid())
-  title       String
-  description String
-  severity    OccurrenceSeverity @default(LOW)
-  
-  packageId   String?
-  package     Package?           @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  
-  routeId     String?
-  route       Route?             @relation(fields: [routeId], references: [id], onDelete: Cascade)
-
-  reportedById String
-  reportedBy   User              @relation("ReportedByUser", fields: [reportedById], references: [id])
-
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-
-  @@map("occurrences")
-}
-
-model AuditLog {
-  id          String   @id @default(uuid())
-  action      String
-  entity      String
-  entityId    String
-  details     Json?
-  
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  createdAt   DateTime @default(now())
-
-  @@map("audit_logs")
-}
