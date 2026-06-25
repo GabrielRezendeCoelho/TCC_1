@@ -29,10 +29,7 @@ export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
   @Get()
-  findAll(
-    @Query() query: PaginationDto,
-    @CurrentUser() user: any,
-  ) {
+  findAll(@Query() query: PaginationDto, @CurrentUser() user: any) {
     return this.routesService.findAll(query, user);
   }
 

@@ -162,7 +162,7 @@
 
 /* ===== Cabeçalho da Página ===== */
 .page {
-  animation: fadeInSlideUp 0.4s ease;
+  animation: fadeIn 0.3s ease;
 }
 
 .page-header {
@@ -286,7 +286,7 @@
   background: var(--color-surface);
   border-radius: var(--border-radius-md);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-sm);
 }
 
@@ -415,6 +415,200 @@
   gap: var(--spacing-2);
 }
 
+/* ===== Linha de Tabela Clicável ===== */
+.table-row-clickable {
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.table-row-clickable:hover {
+  background: rgba(139, 92, 246, 0.06) !important;
+}
+
+/* ===== Botão Voltar ===== */
+.btn-back {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-body);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-title);
+}
+
+/* ===== Botão Mapa ===== */
+.btn-map {
+  background: var(--color-primary);
+  border: none;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-map:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ===== Detalhe da Rota ===== */
+.route-detail-info {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.route-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+/* ===== Barra de Progresso ===== */
+.progress-section {
+  margin-bottom: 4px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-body);
+}
+
+.progress-count {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* ===== Número da Parada ===== */
+.stop-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ===== Mapa ===== */
+.map-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: var(--spacing-4) var(--spacing-5);
+  background: var(--color-surface);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.map-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+}
+
+.map-container {
+  flex: 1;
+  min-height: calc(100vh - 200px);
+  width: 100%;
+}
+
+.map-legend {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.map-legend-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.map-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.map-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Leaflet overrides para tema escuro */
+.leaflet-container {
+  background: #1a1d27;
+}
+
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
 /* ===== Responsivo ===== */
 @media (max-width: 768px) {
   .sidebar {
@@ -449,6 +643,12 @@
   .dashboard-cards {
     grid-template-columns: 1fr 1fr;
   }
+
+  .map-legend {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -456,3 +656,4 @@
     grid-template-columns: 1fr;
   }
 }
+

@@ -1,61 +1,136 @@
 /* ==========================================================================
-   Modal Reutilizável + Formulários CRUD
+   Modal Reutilizável + Formulários CRUD — Design Premium
    ========================================================================== */
 
 /* ===== Overlay ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 200;
   padding: var(--spacing-4);
-  animation: fadeIn 0.15s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 /* ===== Card do Modal ===== */
 .modal-card {
   width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: var(--color-surface);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-floating);
+  max-width: 560px;
+  background: linear-gradient(145deg, #1e2030 0%, #171923 100%);
+  border: 2px solid rgba(139, 92, 246, 0.35);
+  border-radius: 16px;
+  padding: 0;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.06);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
-  animation: fadeInSlideUp 0.25s ease;
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== Header do Modal ===== */
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .modal-card h2 {
   font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-title);
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.3px;
+  margin: 0;
+  line-height: 1.3;
 }
 
-.modal-card p {
-  font-size: 0.875rem;
-  color: var(--color-text-body);
-  line-height: 1.5;
+.modal-subtitle {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* ===== Corpo do Modal (fallback para modais sem header separado) ===== */
+.modal-card > h2:first-child {
+  padding: 24px 28px 0;
+}
+
+.modal-card > .modal-form:first-of-type {
+  padding: 0 28px;
 }
 
 /* ===== Formulário dentro do Modal ===== */
+.modal-body {
+  padding: 20px 28px;
+}
+
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: 16px;
+}
+
+.form-section-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6366f1;
+  margin: 4px 0 -4px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-3);
+  gap: 14px;
 }
 
 .form-group {
@@ -66,120 +141,165 @@
 
 .form-group label {
   font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-body);
+  font-weight: 600;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-group label .required {
+  color: #f87171;
+  font-weight: 700;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: var(--color-background-app);
-  color: var(--color-text-title);
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 17, 23, 0.6);
+  color: #f1f5f9;
   font-size: 0.875rem;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
   font-family: inherit;
+}
+
+.form-group input::placeholder {
+  color: #475569;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: var(--color-primary);
-
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(15, 17, 23, 0.8);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
   outline: none;
+}
+
+.form-group input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .form-group select {
   cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
-/* ===== Ações do Modal ===== */
+.form-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: -2px;
+  line-height: 1.4;
+}
+
+/* ===== Rodapé do Modal (Ações) ===== */
+.modal-footer {
+  padding: 16px 28px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Fallback para modais sem .modal-footer */
 .modal-actions {
   display: flex;
-  gap: var(--spacing-3);
+  gap: 10px;
   margin-top: var(--spacing-2);
   justify-content: flex-end;
+  padding: 16px 28px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .btn-cancel {
   padding: 0.6rem 1.25rem;
-  border-radius: var(--border-radius-sm);
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-body);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
 }
 
 .btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
 }
 
 .btn-save {
-  padding: 0.6rem 1.25rem;
-  border-radius: var(--border-radius-sm);
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 
 .btn-save:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
 }
 
 .btn-save:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-danger {
-  padding: 0.6rem 1.25rem;
-  border-radius: var(--border-radius-sm);
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
   border: none;
-  background: var(--color-error);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 .btn-danger:hover {
-  background: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
 }
 
 /* ===== Botão de Ação no Header da Página ===== */
 .btn-new {
   padding: 0.6rem 1.25rem;
-  border-radius: var(--border-radius-sm);
+  border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 
 .btn-new:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
 }
 
 /* ===== Botões inline na Tabela ===== */
@@ -191,9 +311,9 @@
 
 .btn-icon {
   padding: 0.35rem 0.65rem;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: var(--color-surface);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--color-text-body);
   cursor: pointer;
   display: inline-flex;
@@ -202,75 +322,148 @@
   font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
-  transition: all var(--transition-base);
+  transition: all 0.15s ease;
 }
 
 .btn-icon:hover {
-  background: var(--color-surface-hover);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--color-text-title);
 }
 
 .btn-icon.edit:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.08);
 }
 
 .btn-icon.delete:hover {
-  border-color: var(--color-error);
-  color: var(--color-error);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
 }
 
 .btn-icon.deliver {
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .btn-icon.deliver:hover {
-  border-color: #059669;
-  color: #059669;
-  background: rgba(16, 185, 129, 0.18);
-  transform: scale(1.1);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
 }
 
-/* ===== Toast de Sucesso ===== */
+/* ===== Toast ===== */
 .toast {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--border-radius-sm);
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   z-index: 300;
-  animation: fadeInSlideUp 0.3s ease;
-  box-shadow: var(--shadow-md);
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .toast--success {
-  background: var(--color-secondary);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
   color: white;
 }
 
 .toast--error {
-  background: var(--color-error);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
 }
 
-/* ===== Confirmação de Exclusão ===== */
+/* ===== Confirmação ===== */
 .confirm-text {
   font-size: 0.9375rem;
-  color: var(--color-text-body);
-  line-height: 1.6;
+  color: #cbd5e1;
+  line-height: 1.7;
 }
 
 .confirm-text strong {
-  color: var(--color-error);
+  color: #f1f5f9;
+}
+
+/* ===== Ícone decorativo do modal ===== */
+.modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.modal-icon--edit {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.modal-icon--danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.modal-icon--success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.modal-icon--profile {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Modificações específicas de padding para o perfil do usuário */
+.modal-header--profile {
+  padding: 28px 36px 18px;
+}
+
+.modal-body--profile {
+  padding: 28px 36px;
+}
+
+.modal-footer--profile {
+  padding: 18px 36px 28px;
 }
 
 @media (max-width: 640px) {
   .form-row {
     grid-template-columns: 1fr;
   }
+  .modal-footer,
   .modal-actions {
     flex-direction: column;
+  }
+  .modal-card {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+  .modal-header,
+  .modal-header--profile,
+  .modal-body,
+  .modal-body--profile,
+  .modal-footer,
+  .modal-footer--profile,
+  .modal-actions {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }

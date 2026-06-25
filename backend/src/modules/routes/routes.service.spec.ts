@@ -6,7 +6,7 @@ import {
   ROUTE_OPTIMIZER_TOKEN,
 } from './interfaces/route-optimizer.interface';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { RouteStatus, PackageStatus } from '@prisma/client';
+import { RouteStatus, PackageStatus, Role } from '@prisma/client';
 
 describe('RoutesService', () => {
   let routesService: RoutesService;

@@ -159,7 +159,9 @@ export class UsersService {
     await this.prisma.route.deleteMany({ where: { createdById: id } });
 
     // Se o usuário for um cliente, ele pode ter pacotes atrelados que bloqueiam a exclusão
-    const client = await this.prisma.client.findUnique({ where: { userId: id } });
+    const client = await this.prisma.client.findUnique({
+      where: { userId: id },
+    });
     if (client) {
       await this.prisma.package.deleteMany({ where: { clientId: client.id } });
     }

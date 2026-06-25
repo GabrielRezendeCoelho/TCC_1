@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { driversService } from '../services/drivers.service'
 import { api } from '../services/api'
 import type { Driver } from '../types'
-import { maskPhone, unmask } from '../utils/masks'
+import { maskPhone, maskCpf, isValidCpf, unmask } from '../utils/masks'
 import '../pages/Panel.css'
 import '../pages/Crud.css'
 
@@ -74,7 +74,7 @@ export function Drivers() {
       name: driver.user?.name || '',
       email: driver.user?.email || '',
       password: '',
-      licenseNumber: driver.licenseNumber,
+      licenseNumber: maskCpf(driver.licenseNumber),
       phone: driver.phone,
     })
     setShowModal(true)
@@ -82,12 +82,19 @@ export function Drivers() {
 
   async function handleSave() {
     if (!form.licenseNumber || !form.phone) return
+
+    // Validar CPF
+    if (!isValidCpf(form.licenseNumber)) {
+      showToast('CPF inválido', 'error')
+      return
+    }
+
     setSaving(true)
     try {
       if (editingDriver) {
         // Atualiza campos do Driver
         await driversService.update(editingDriver.id, {
-          licenseNumber: form.licenseNumber,
+          licenseNumber: unmask(form.licenseNumber),
           phone: form.phone,
         })
 
@@ -114,7 +121,7 @@ export function Drivers() {
 
         // 2. Cria o perfil do motorista vinculado
         await driversService.create({
-          licenseNumber: form.licenseNumber,
+          licenseNumber: unmask(form.licenseNumber),
           phone: form.phone,
           userId: userRes.data?.id || userRes.id,
         })
@@ -180,7 +187,7 @@ export function Drivers() {
               <tr>
                 <th>Nome</th>
                 <th>E-mail</th>
-                <th>CNH</th>
+                <th>CPF</th>
                 <th>Telefone</th>
                 <th>Status</th>
                 <th>Ações</th>
@@ -203,7 +210,7 @@ export function Drivers() {
                       </td>
                       <td>{driver.user?.email}</td>
                       <td>
-                        <code>{driver.licenseNumber}</code>
+                        <code>{maskCpf(driver.licenseNumber)}</code>
                       </td>
                       <td>{driver.phone}</td>
                       <td>
@@ -259,63 +266,84 @@ export function Drivers() {
         </div>
       )}
 
-      {/* Modal Criar/Editar */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingDriver ? 'Editar Motorista' : 'Novo Motorista'}</h2>
-            <div className="modal-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nome *</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Nome completo"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>E-mail *</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="motorista@trackgo.com"
-                    disabled={!!editingDriver}
-                  />
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className="modal-icon modal-icon--edit">✏️</div>
+                <div className="modal-header-info">
+                  <h2>{editingDriver ? 'Editar Motorista' : 'Novo Motorista'}</h2>
+                  <p className="modal-subtitle">
+                    {editingDriver
+                      ? `Editando dados de ${editingDriver.user?.name || 'motorista'}`
+                      : 'Preencha os dados para cadastrar um novo motorista'}
+                  </p>
                 </div>
               </div>
-              {!editingDriver && (
-                <div className="form-group">
-                  <label>Senha *</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder="Mínimo 6 caracteres"
-                  />
+              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="modal-form">
+                {!editingDriver && (
+                  <span className="form-section-title">Dados do Usuário</span>
+                )}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nome <span className="required">*</span></label>
+                    <input
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="Nome completo"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>E-mail <span className="required">*</span></label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="motorista@trackgo.com"
+                      disabled={!!editingDriver}
+                    />
+                  </div>
                 </div>
-              )}
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Número da CNH *</label>
-                  <input
-                    value={form.licenseNumber}
-                    onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })}
-                    placeholder="12345678900"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Telefone *</label>
-                  <input
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: maskPhone(e.target.value) })}
-                    placeholder="(11) 99999-9999"
-                  />
+                {!editingDriver && (
+                  <div className="form-group">
+                    <label>Senha <span className="required">*</span></label>
+                    <input
+                      type="password"
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  </div>
+                )}
+                <span className="form-section-title">Dados do Motorista</span>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>CPF <span className="required">*</span></label>
+                    <input
+                      value={form.licenseNumber}
+                      onChange={(e) => setForm({ ...form, licenseNumber: maskCpf(e.target.value) })}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Telefone <span className="required">*</span></label>
+                    <input
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: maskPhone(e.target.value) })}
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="modal-actions">
+
+            <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setShowModal(false)}>
                 Cancelar
               </button>
@@ -327,39 +355,52 @@ export function Drivers() {
         </div>
       )}
 
-      {/* Modal Confirmar Ação */}
       {confirmAction && (
         <div className="modal-overlay" onClick={() => setConfirmAction(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>
-              {confirmAction.type === 'deactivate'
-                ? 'Desativar Motorista'
-                : confirmAction.type === 'activate'
-                  ? 'Ativar Motorista'
-                  : 'Excluir Permanentemente'}
-            </h2>
-            <p className="confirm-text">
-              {confirmAction.type === 'deactivate' ? (
-                <>
-                  Deseja desativar <strong>{confirmAction.driver.user?.name}</strong>? O login será
-                  bloqueado para o aplicativo.
-                </>
-              ) : confirmAction.type === 'activate' ? (
-                <>
-                  Deseja reativar o acesso de <strong>{confirmAction.driver.user?.name}</strong>{' '}
-                  para entregas?
-                </>
-              ) : (
-                <>
-                  Deseja excluir{' '}
-                  <strong style={{ color: 'var(--color-error)' }}>
-                    {confirmAction.driver.user?.name}
-                  </strong>{' '}
-                  permanentemente? Essa ação removerá o perfil e o acesso.
-                </>
-              )}
-            </p>
-            <div className="modal-actions">
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className={`modal-icon ${confirmAction.type === 'activate' ? 'modal-icon--success' : 'modal-icon--danger'}`}>
+                  {confirmAction.type === 'activate' ? '✅' : confirmAction.type === 'deactivate' ? '⚠️' : '🗑️'}
+                </div>
+                <div className="modal-header-info">
+                  <h2>
+                    {confirmAction.type === 'deactivate'
+                      ? 'Desativar Motorista'
+                      : confirmAction.type === 'activate'
+                        ? 'Ativar Motorista'
+                        : 'Excluir Permanentemente'}
+                  </h2>
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => setConfirmAction(null)}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <p className="confirm-text">
+                {confirmAction.type === 'deactivate' ? (
+                  <>
+                    Deseja desativar <strong>{confirmAction.driver.user?.name}</strong>? O login será
+                    bloqueado para o aplicativo.
+                  </>
+                ) : confirmAction.type === 'activate' ? (
+                  <>
+                    Deseja reativar o acesso de <strong>{confirmAction.driver.user?.name}</strong>{' '}
+                    para entregas?
+                  </>
+                ) : (
+                  <>
+                    Deseja excluir{' '}
+                    <strong style={{ color: '#f87171' }}>
+                      {confirmAction.driver.user?.name}
+                    </strong>{' '}
+                    permanentemente? Essa ação removerá o perfil e o acesso.
+                  </>
+                )}
+              </p>
+            </div>
+
+            <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setConfirmAction(null)}>
                 Cancelar
               </button>

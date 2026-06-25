@@ -301,8 +301,8 @@ export function Login() {
 
       {/* ===== Modal Esqueci Minha Senha ===== */}
       {showForgotModal && (
-        <div className="modal-overlay" onClick={closeForgotModal}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="login-modal-overlay" onClick={closeForgotModal}>
+          <div className="login-modal-card" onClick={(e) => e.stopPropagation()}>
             {!forgotSent ? (
               <>
                 <h2>Recuperar senha</h2>
@@ -325,7 +325,7 @@ export function Login() {
                   </div>
                 </div>
 
-                <div className="modal-actions">
+                <div className="login-modal-actions">
                   <button type="button" className="btn-secondary" onClick={closeForgotModal}>
                     Cancelar
                   </button>
@@ -346,7 +346,7 @@ export function Login() {
                   Se o e-mail <strong>{forgotEmail}</strong> estiver cadastrado, você receberá as
                   instruções em instantes.
                 </p>
-                <div className="modal-actions">
+                <div className="login-modal-actions">
                   <button type="button" className="btn-modal-primary" onClick={closeForgotModal}>
                     Voltar ao login
                   </button>

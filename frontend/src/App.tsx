@@ -4,7 +4,9 @@ import { PageContainer, PrivateRoute } from './components/layout'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Dashboard } from './pages/Dashboard'
-import { Packages } from './pages/Packages'
+import { Routes as RoutesPage } from './pages/Routes'
+import { RouteDetail } from './pages/RouteDetail'
+import { RouteMap } from './pages/RouteMap'
 import { Drivers } from './pages/Drivers'
 import { Users } from './pages/Users'
 import './index.css'
@@ -30,7 +32,9 @@ function App() {
             }
           >
             <Route path="/" element={<Dashboard />} />
-            <Route path="/packages" element={<Packages />} />
+            <Route path="/routes" element={<RoutesPage />} />
+            <Route path="/routes/:routeId" element={<RouteDetail />} />
+            <Route path="/routes/:routeId/map" element={<RouteMap />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/users" element={<Users />} />
           </Route>
@@ -44,3 +48,4 @@ function App() {
 }
 
 export default App
+

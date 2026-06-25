@@ -8,6 +8,8 @@ import {
 } from 'class-validator';
 import { Role } from '@prisma/client';
 
+import { IsCpfOrCnpj } from '../../../common/decorators';
+
 export class RegisterDto {
   @IsString()
   @IsNotEmpty({ message: 'Nome é obrigatório' })
@@ -15,6 +17,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
+  @IsCpfOrCnpj({ message: 'CPF inválido' })
   cpf?: string;
 
   @IsEmail({}, { message: 'E-mail inválido' })

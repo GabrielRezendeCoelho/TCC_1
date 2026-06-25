@@ -69,14 +69,14 @@ export function Sidebar() {
 
   const allNavItems = [
     { path: '/', label: 'Dashboard', emoji: '' },
-    { path: '/packages', label: 'Entregas', emoji: '' },
+    { path: '/routes', label: 'Rotas', emoji: '' },
     { path: '/drivers', label: 'Motoristas', emoji: '' },
     { path: '/users', label: 'Usuários', emoji: '' },
   ]
 
   const navItems = user?.role === 'ADMIN' 
     ? allNavItems 
-    : allNavItems.filter(item => item.path === '/' || item.path === '/packages')
+    : allNavItems.filter(item => item.path === '/' || item.path === '/routes')
 
   return (
     <>
@@ -118,54 +118,68 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Modal de Perfil */}
       {showProfile && (
         <div className="modal-overlay" onClick={() => setShowProfile(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>Meu Perfil</h2>
-            <div className="modal-form">
-              <div className="form-group">
-                <label>Nome</label>
-                <input
-                  value={profileForm.name}
-                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Endereço da Base (ponto de partida das rotas)</label>
-                <input
-                  value={profileForm.baseAddress}
-                  onChange={(e) => setProfileForm({ ...profileForm, baseAddress: e.target.value })}
-                  placeholder="Rua da Base, 100, São Paulo, SP"
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Latitude da Base</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={profileForm.baseLat}
-                    onChange={(e) => setProfileForm({ ...profileForm, baseLat: e.target.value })}
-                    placeholder="-23.550520"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Longitude da Base</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={profileForm.baseLng}
-                    onChange={(e) => setProfileForm({ ...profileForm, baseLng: e.target.value })}
-                    placeholder="-46.633308"
-                  />
+            <div className="modal-header modal-header--profile">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className="modal-icon modal-icon--profile">👤</div>
+                <div className="modal-header-info">
+                  <h2>Meu Perfil</h2>
+                  <p className="modal-subtitle">Gerencie seus dados e endereço base</p>
                 </div>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                O endereço da base é usado como ponto de partida para gerar rotas inteligentes.
-              </p>
+              <button className="modal-close" onClick={() => setShowProfile(false)}>✕</button>
             </div>
-            <div className="modal-actions">
+
+            <div className="modal-body modal-body--profile">
+              <div className="modal-form">
+                <div className="form-group">
+                  <label>Nome</label>
+                  <input
+                    value={profileForm.name}
+                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  />
+                </div>
+
+                <span className="form-section-title">Endereço da Base</span>
+                <div className="form-group">
+                  <label>Endereço (ponto de partida das rotas)</label>
+                  <input
+                    value={profileForm.baseAddress}
+                    onChange={(e) => setProfileForm({ ...profileForm, baseAddress: e.target.value })}
+                    placeholder="Rua da Base, 100, São Paulo, SP"
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Latitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={profileForm.baseLat}
+                      onChange={(e) => setProfileForm({ ...profileForm, baseLat: e.target.value })}
+                      placeholder="-23.550520"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Longitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={profileForm.baseLng}
+                      onChange={(e) => setProfileForm({ ...profileForm, baseLng: e.target.value })}
+                      placeholder="-46.633308"
+                    />
+                  </div>
+                </div>
+                <p className="form-hint">
+                  O endereço da base é usado como ponto de partida para gerar rotas inteligentes.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer modal-footer--profile">
               <button className="btn-cancel" onClick={() => setShowProfile(false)}>
                 Fechar
               </button>

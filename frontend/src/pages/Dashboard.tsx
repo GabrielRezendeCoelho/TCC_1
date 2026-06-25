@@ -88,7 +88,6 @@ export function Dashboard() {
       {/* KPI Cards */}
       <div className="dashboard-cards">
         <div className="card card--stat" id="stat-packages">
-          <span className="card-icon">PKG</span>
           <div className="card-content">
             <h3>Pacotes</h3>
             <p className="card-value">{stats.packages}</p>
@@ -97,7 +96,6 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-routes">
-          <span className="card-icon">RTA</span>
           <div className="card-content">
             <h3>Rotas</h3>
             <p className="card-value">{stats.routes}</p>
@@ -106,7 +104,6 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-drivers">
-          <span className="card-icon">MOT</span>
           <div className="card-content">
             <h3>Motoristas</h3>
             <p className="card-value">{stats.drivers}</p>
@@ -115,7 +112,6 @@ export function Dashboard() {
         </div>
 
         <div className="card card--stat" id="stat-delivered">
-          <span className="card-icon">OK</span>
           <div className="card-content">
             <h3>Entregas</h3>
             <p className="card-value">{stats.delivered}</p>

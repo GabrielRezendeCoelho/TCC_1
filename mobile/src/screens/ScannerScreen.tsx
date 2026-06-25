@@ -29,6 +29,29 @@ export function ScannerScreen() {
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     setShowCamera(false);
+
+    // Tenta analisar se o dado é um JSON estruturado para autopreenchimento
+    try {
+      const cleanData = data.trim();
+      if (cleanData.startsWith('{') && cleanData.endsWith('}')) {
+        const parsed = JSON.parse(cleanData);
+        if (parsed.trackingCode) setTrackingCode(parsed.trackingCode);
+        if (parsed.recipientName) setRecipientName(parsed.recipientName);
+        if (parsed.street) setStreet(parsed.street);
+        if (parsed.number) setNumber(String(parsed.number));
+        if (parsed.city) setCity(parsed.city);
+        if (parsed.state) setState(parsed.state.toUpperCase().slice(0, 2));
+
+        Alert.alert(
+          'Autopreenchimento',
+          'Dados do pacote preenchidos automaticamente via QR Code com sucesso!'
+        );
+        return;
+      }
+    } catch (e) {
+      console.warn('Código escaneado não é um JSON estruturado válido de autopreenchimento, tratando como código de rastreio simples.');
+    }
+
     setTrackingCode(data);
     Alert.alert('Código Escaneado', data);
   };

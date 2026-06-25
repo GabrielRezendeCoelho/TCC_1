@@ -31,10 +31,7 @@ export class PackagesController {
 
   @Post()
   @Roles(Role.ADMIN, Role.OPERATOR, Role.DRIVER)
-  create(
-    @Body() dto: Record<string, any>,
-    @CurrentUser() user: any,
-  ) {
+  create(@Body() dto: Record<string, any>, @CurrentUser() user: any) {
     return this.packagesService.create(dto as CreatePackageDto, user);
   }
 

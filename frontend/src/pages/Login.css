@@ -296,7 +296,7 @@
 }
 
 /* ===== Modal Esqueci Senha ===== */
-.modal-overlay {
+.login-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
@@ -309,7 +309,7 @@
   padding: var(--spacing-4);
 }
 
-.modal-card {
+.login-modal-card {
   width: 100%;
   max-width: 400px;
   background: var(--color-surface);
@@ -322,18 +322,18 @@
   animation: fadeInSlideUp 0.3s ease;
 }
 
-.modal-card h2 {
+.login-modal-card h2 {
   font-size: 1.25rem;
   color: var(--color-text-title);
 }
 
-.modal-card p {
+.login-modal-card p {
   font-size: 0.875rem;
   color: var(--color-text-body);
   line-height: 1.5;
 }
 
-.modal-actions {
+.login-modal-actions {
   display: flex;
   gap: var(--spacing-3);
   margin-top: var(--spacing-2);

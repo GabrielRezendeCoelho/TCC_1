@@ -31,7 +31,7 @@ describe('App & Auth (e2e)', () => {
   it('/api/auth/login (POST) - Deve retornar 401 para credenciais falsas', async () => {
     return request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email: 'fake@email.com', password: 'wrong' })
+      .send({ email: 'fake@email.com', password: 'wrongpassword' })
       .expect(401);
   });
 

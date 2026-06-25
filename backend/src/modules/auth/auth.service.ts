@@ -144,7 +144,12 @@ export class AuthService {
   /**
    * Gera o token JWT com payload padronizado.
    */
-  private generateToken(userId: string, email: string, role: string, name: string) {
+  private generateToken(
+    userId: string,
+    email: string,
+    role: string,
+    name: string,
+  ) {
     const payload = { sub: userId, email, role };
 
     return {

@@ -32,7 +32,10 @@ export class RoutesService {
   /**
    * Lista rotas com paginação e busca.
    */
-  async findAll(query: PaginationDto, currentUser?: { id: string; role: string }) {
+  async findAll(
+    query: PaginationDto,
+    currentUser?: { id: string; role: string },
+  ) {
     const { page = 1, limit = 20, search } = query;
     const skip = (page - 1) * limit;
 
@@ -79,7 +82,15 @@ export class RoutesService {
       where: { id },
       include: {
         driver: { include: { user: { select: { name: true, email: true } } } },
-        createdBy: { select: { name: true, email: true, baseAddress: true, baseLat: true, baseLng: true } },
+        createdBy: {
+          select: {
+            name: true,
+            email: true,
+            baseAddress: true,
+            baseLat: true,
+            baseLng: true,
+          },
+        },
         packages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -169,22 +180,45 @@ export class RoutesService {
 
     // Se o usuário está em outra região, mas os pacotes estão com coordenadas fictícias de São Paulo,
     // ou não têm coordenadas, ou estão muito longe da base, vamos re-geocodificar ou aproximá-los da base automaticamente.
-    const isUserInSP = user.baseLat >= -23.65 && user.baseLat <= -23.45 && user.baseLng >= -46.75 && user.baseLng <= -46.53;
+    const isUserInSP =
+      user.baseLat >= -23.65 &&
+      user.baseLat <= -23.45 &&
+      user.baseLng >= -46.75 &&
+      user.baseLng <= -46.53;
 
     const parts = user.baseAddress ? user.baseAddress.split('-') : [];
-    const cityState = parts.length >= 2 ? parts[1].replace('/', ', ').trim() : '';
+    const cityState =
+      parts.length >= 2 ? parts[1].replace('/', ', ').trim() : '';
     const cityName = cityState.split(',')[0].trim().toLowerCase();
 
     for (const pkg of route.packages) {
-      const isPkgInSP = pkg.latitude && pkg.latitude >= -23.65 && pkg.latitude <= -23.45 && pkg.longitude && pkg.longitude >= -46.75 && pkg.longitude <= -46.53;
-      
-      const isPkgFarFromBase = pkg.latitude && pkg.longitude && 
-        (Math.abs(pkg.latitude - user.baseLat) > 1.0 || Math.abs(pkg.longitude - user.baseLng) > 1.0);
+      const isPkgInSP =
+        pkg.latitude &&
+        pkg.latitude >= -23.65 &&
+        pkg.latitude <= -23.45 &&
+        pkg.longitude &&
+        pkg.longitude >= -46.75 &&
+        pkg.longitude <= -46.53;
 
-      if ((isPkgInSP && !isUserInSP) || pkg.latitude === null || pkg.longitude === null || (isPkgFarFromBase && cityState)) {
+      const isPkgFarFromBase =
+        pkg.latitude &&
+        pkg.longitude &&
+        (Math.abs(pkg.latitude - user.baseLat) > 1.0 ||
+          Math.abs(pkg.longitude - user.baseLng) > 1.0);
+
+      if (
+        (isPkgInSP && !isUserInSP) ||
+        pkg.latitude === null ||
+        pkg.longitude === null ||
+        (isPkgFarFromBase && cityState)
+      ) {
         try {
           let addressQuery = pkg.address;
-          if (cityState && cityName && !pkg.address.toLowerCase().includes(cityName)) {
+          if (
+            cityState &&
+            cityName &&
+            !pkg.address.toLowerCase().includes(cityName)
+          ) {
             addressQuery = `${pkg.address}, ${cityState}`;
           }
 
@@ -195,13 +229,13 @@ export class RoutesService {
               headers: {
                 'User-Agent': 'TrackGo-Backend/1.0',
               },
-            }
+            },
           );
           const results = (await response.json()) as any[];
           if (results && results.length > 0) {
             const newLat = parseFloat(results[0].lat);
             const newLng = parseFloat(results[0].lon);
-            
+
             await this.prisma.package.update({
               where: { id: pkg.id },
               data: { latitude: newLat, longitude: newLng },
@@ -212,7 +246,7 @@ export class RoutesService {
             // Fallback: coloca próximo à base do criador/motorista
             const newLat = user.baseLat + (Math.random() - 0.5) * 0.01;
             const newLng = user.baseLng + (Math.random() - 0.5) * 0.01;
-            
+
             await this.prisma.package.update({
               where: { id: pkg.id },
               data: { latitude: newLat, longitude: newLng },
@@ -221,7 +255,10 @@ export class RoutesService {
             pkg.longitude = newLng;
           }
         } catch (err) {
-          console.error(`Erro ao corrigir coordenadas do pacote ${pkg.id}:`, err);
+          console.error(
+            `Erro ao corrigir coordenadas do pacote ${pkg.id}:`,
+            err,
+          );
         }
       }
     }
@@ -230,9 +267,9 @@ export class RoutesService {
       (pkg) => pkg.latitude !== null && pkg.longitude !== null,
     );
 
-    if (packagesWithCoords.length === 0) {
+    if (packagesWithCoords.length < 2) {
       throw new BadRequestException(
-        'São necessários pacotes com coordenadas para otimizar',
+        'São necessários pelo menos 2 pacotes com coordenadas para otimizar',
       );
     }
 

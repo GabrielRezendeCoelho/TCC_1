@@ -232,56 +232,72 @@ export function Users() {
         </div>
       )}
 
-      {/* Modal Criar/Editar */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</h2>
-            <div className="modal-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nome *</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Nome completo"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>E-mail *</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="usuario@trackgo.com"
-                  />
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className="modal-icon modal-icon--edit">👤</div>
+                <div className="modal-header-info">
+                  <h2>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</h2>
+                  <p className="modal-subtitle">
+                    {editingUser
+                      ? `Editando dados de ${editingUser.name}`
+                      : 'Preencha os dados para cadastrar um novo usuário'}
+                  </p>
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>{editingUser ? 'Nova Senha (opcional)' : 'Senha *'}</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    placeholder="Mínimo 6 caracteres"
-                  />
+              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="modal-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Nome <span className="required">*</span></label>
+                    <input
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="Nome completo"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>E-mail <span className="required">*</span></label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="usuario@trackgo.com"
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Perfil *</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  >
-                    <option value="ADMIN">Administrador</option>
-                    <option value="OPERATOR">Operador</option>
-                    <option value="DRIVER">Motorista</option>
-                    <option value="CLIENT">Cliente</option>
-                  </select>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>{editingUser ? 'Nova Senha (opcional)' : <>Senha <span className="required">*</span></>}</label>
+                    <input
+                      type="password"
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Perfil <span className="required">*</span></label>
+                    <select
+                      value={form.role}
+                      onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    >
+                      <option value="ADMIN">Administrador</option>
+                      <option value="OPERATOR">Operador</option>
+                      <option value="DRIVER">Motorista</option>
+                      <option value="CLIENT">Cliente</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="modal-actions">
+
+            <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setShowModal(false)}>
                 Cancelar
               </button>
@@ -293,37 +309,50 @@ export function Users() {
         </div>
       )}
 
-      {/* Modal Confirmar Ação */}
       {confirmAction && (
         <div className="modal-overlay" onClick={() => setConfirmAction(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>
-              {confirmAction.type === 'deactivate'
-                ? 'Desativar Usuário'
-                : confirmAction.type === 'activate'
-                  ? 'Ativar Usuário'
-                  : 'Excluir Permanentemente'}
-            </h2>
-            <p className="confirm-text">
-              {confirmAction.type === 'deactivate' ? (
-                <>
-                  Deseja desativar <strong>{confirmAction.user.name}</strong>? O login será
-                  bloqueado.
-                </>
-              ) : confirmAction.type === 'activate' ? (
-                <>
-                  Deseja reativar <strong>{confirmAction.user.name}</strong>? O acesso será
-                  restaurado.
-                </>
-              ) : (
-                <>
-                  Deseja excluir{' '}
-                  <strong style={{ color: 'var(--color-error)' }}>{confirmAction.user.name}</strong>{' '}
-                  permanentemente?
-                </>
-              )}
-            </p>
-            <div className="modal-actions">
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className={`modal-icon ${confirmAction.type === 'activate' ? 'modal-icon--success' : 'modal-icon--danger'}`}>
+                  {confirmAction.type === 'activate' ? '✅' : confirmAction.type === 'deactivate' ? '⚠️' : '🗑️'}
+                </div>
+                <div className="modal-header-info">
+                  <h2>
+                    {confirmAction.type === 'deactivate'
+                      ? 'Desativar Usuário'
+                      : confirmAction.type === 'activate'
+                        ? 'Ativar Usuário'
+                        : 'Excluir Permanentemente'}
+                  </h2>
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => setConfirmAction(null)}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <p className="confirm-text">
+                {confirmAction.type === 'deactivate' ? (
+                  <>
+                    Deseja desativar <strong>{confirmAction.user.name}</strong>? O login será
+                    bloqueado.
+                  </>
+                ) : confirmAction.type === 'activate' ? (
+                  <>
+                    Deseja reativar <strong>{confirmAction.user.name}</strong>? O acesso será
+                    restaurado.
+                  </>
+                ) : (
+                  <>
+                    Deseja excluir{' '}
+                    <strong style={{ color: '#f87171' }}>{confirmAction.user.name}</strong>{' '}
+                    permanentemente?
+                  </>
+                )}
+              </p>
+            </div>
+
+            <div className="modal-footer">
               <button className="btn-cancel" onClick={() => setConfirmAction(null)}>
                 Cancelar
               </button>

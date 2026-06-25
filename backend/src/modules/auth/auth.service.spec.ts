@@ -122,7 +122,12 @@ describe('AuthService (Unitário)', () => {
 
       expect(result).toEqual({
         accessToken: 'fake-jwt-token',
-        user: { id: mockUser.id, email: mockUser.email, role: mockUser.role, name: mockUser.name },
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          name: mockUser.name,
+        },
       });
     });
 

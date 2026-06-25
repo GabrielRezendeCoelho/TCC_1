@@ -123,8 +123,12 @@ export class DriversService {
     await this.prisma.driver.delete({ where: { id } });
 
     // Remove registros do usuário que bloqueiam exclusão (sem cascade no schema)
-    await this.prisma.occurrence.deleteMany({ where: { reportedById: driver.userId } });
-    await this.prisma.route.deleteMany({ where: { createdById: driver.userId } });
+    await this.prisma.occurrence.deleteMany({
+      where: { reportedById: driver.userId },
+    });
+    await this.prisma.route.deleteMany({
+      where: { createdById: driver.userId },
+    });
 
     // Depois deleta o usuário
     return this.prisma.user.delete({ where: { id: driver.userId } });

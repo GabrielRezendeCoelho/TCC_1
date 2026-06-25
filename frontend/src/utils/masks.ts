@@ -95,6 +95,17 @@ export const maskCep = (value: string) => {
 }
 
 /**
+ * Aplica máscara de Data (DD/MM/AAAA)
+ */
+export const maskDate = (value: string) => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{2})(\d)/, '$1/$2')
+    .replace(/(\d{2})(\d)/, '$1/$2')
+    .replace(/(\/\d{4})\d+?$/, '$1')
+}
+
+/**
  * Remove qualquer formatação (mantém apenas números)
  */
 export const unmask = (value: string) => {

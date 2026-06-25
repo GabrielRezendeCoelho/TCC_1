@@ -48,72 +48,74 @@ export class RouteOptimizerService implements IRouteOptimizer {
       };
     }
 
-    try {
-      // Monta as coordenadas no formato lon,lat para o OSRM
-      const coordinates = [
-        `${startPoint.longitude},${startPoint.latitude}`,
-        ...waypoints.map((wp) => `${wp.longitude},${wp.latitude}`),
-      ].join(';');
+    return this.lockedLogger.executeWithLock(
+      'RouteOptimizer',
+      'optimize_route_osrm',
+      { waypointCount: waypoints.length },
+      async () => {
+        try {
+          // Monta as coordenadas no formato lon,lat para o OSRM
+          const coordinates = [
+            `${startPoint.longitude},${startPoint.latitude}`,
+            ...waypoints.map((wp) => `${wp.longitude},${wp.latitude}`),
+          ].join(';');
 
-      const url = `${this.osrmBaseUrl}/trip/v1/driving/${coordinates}?overview=false&source=first&roundtrip=false`;
+          const url = `${this.osrmBaseUrl}/trip/v1/driving/${coordinates}?overview=false&source=first&roundtrip=false`;
 
-      const response = await fetch(url);
-      interface OsrmResponse {
-        code: string;
-        trips?: Array<{ distance: number; duration: number }>;
-        waypoints?: Array<{ waypoint_index: number }>;
-      }
+          const response = await fetch(url);
+          interface OsrmResponse {
+            code: string;
+            trips?: Array<{ distance: number; duration: number }>;
+            waypoints?: Array<{ waypoint_index: number }>;
+          }
 
-      const data = (await response.json()) as OsrmResponse;
+          const data = (await response.json()) as OsrmResponse;
 
-      if (data.code !== 'Ok' || !data.trips || !data.waypoints || data.trips.length === 0) {
-        await this.lockedLogger.logWarn(
-          'RouteOptimizer',
-          `OSRM retornou código não-OK ou dados incompletos: ${data.code}. Utilizando fallback.`,
-          { osrmCode: data.code },
-        );
-        return this.fallbackOrder(waypoints);
-      }
+          if (
+            data.code !== 'Ok' ||
+            !data.trips ||
+            !data.waypoints ||
+            data.trips.length === 0
+          ) {
+            await this.lockedLogger.logWarn(
+              'RouteOptimizer',
+              `OSRM retornou código não-OK ou dados incompletos: ${data.code}. Utilizando fallback.`,
+              { osrmCode: data.code },
+            );
+            return this.fallbackOrder(waypoints);
+          }
 
-      const trip = data.trips[0];
+          const trip = data.trips[0];
 
-      // Reordena waypoints com base na sequência otimizada do OSRM.
-      // Os waypoints no JSON retornado pela API OSRM Trip já estão na ordem otimizada de visitação.
-      // O primeiro elemento (índice 0) é o ponto de partida, os próximos são as entregas.
-      const waypointIndices = data.waypoints
-        .slice(1)
-        .map((wp: { waypoint_index: number }) => wp.waypoint_index - 1);
+          // Reordena waypoints com base na sequência otimizada do OSRM.
+          // Os waypoints no JSON retornado pela API OSRM Trip já estão na ordem otimizada de visitação.
+          // O primeiro elemento (índice 0) é o ponto de partida, os próximos são as entregas.
+          const waypointIndices = data.waypoints
+            .slice(1)
+            .map((wp: { waypoint_index: number }) => wp.waypoint_index - 1);
 
-      const orderedWaypoints = waypointIndices.map(
-        (index: number) => waypoints[index],
-      );
+          const orderedWaypoints = waypointIndices.map(
+            (index: number) => waypoints[index],
+          );
 
-      const result: OptimizationResult = {
-        orderedWaypoints,
-        totalDistance: Math.round((trip.distance / 1000) * 100) / 100,
-        estimatedTime: Math.round((trip.duration / 60) * 100) / 100,
-      };
+          const result: OptimizationResult = {
+            orderedWaypoints,
+            totalDistance: Math.round((trip.distance / 1000) * 100) / 100,
+            estimatedTime: Math.round((trip.duration / 60) * 100) / 100,
+          };
 
-      await this.lockedLogger.logInfo(
-        'RouteOptimizer',
-        `Rota otimizada com sucesso via OSRM`,
-        {
-          totalDistance: result.totalDistance,
-          estimatedTime: result.estimatedTime,
-          waypointCount: result.orderedWaypoints.length,
-        },
-      );
-
-      return result;
-    } catch (error) {
-      await this.lockedLogger.logError(
-        'RouteOptimizer',
-        'Falha ao otimizar rota via OSRM. Utilizando fallback.',
-        error instanceof Error ? error : new Error(String(error)),
-        { waypointCount: waypoints.length },
-      );
-      return this.fallbackOrder(waypoints);
-    }
+          return result;
+        } catch (error) {
+          await this.lockedLogger.logError(
+            'RouteOptimizer',
+            'Falha ao otimizar rota via OSRM. Utilizando fallback.',
+            error instanceof Error ? error : new Error(String(error)),
+            { waypointCount: waypoints.length },
+          );
+          return this.fallbackOrder(waypoints);
+        }
+      },
+    );
   }
 
   /**
