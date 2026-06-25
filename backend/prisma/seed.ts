@@ -1,4 +1,4 @@
-import { PrismaClient, Role, PackageStatus, RouteStatus, OccurrenceSeverity } from '@prisma/client';
+import { PrismaClient, Role, PackageStatus, RouteStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -26,9 +26,6 @@ async function main() {
   console.log('🌱 Iniciando seed focado em métricas de BI e análise de dados (TrackGo)...');
 
   // 1. Limpeza de dados
-  await prisma.auditLog.deleteMany();
-  await prisma.occurrence.deleteMany();
-  await prisma.deliveryProof.deleteMany();
   await prisma.tracking.deleteMany();
   await prisma.package.deleteMany();
   await prisma.route.deleteMany();
@@ -209,10 +206,9 @@ async function main() {
     createdPackages.push(pkg);
   }
 
-  // 8. Eventos de tracking e Ocorrências cronológicas (Simulando BI Timeline)
-  console.log('📍 Gerando Tracking Events e Ocorrências...');
+  // 8. Eventos de tracking cronológicos (Simulando BI Timeline)
+  console.log('📍 Gerando Tracking Events...');
   const trackingData = [];
-  const occurrencesData = [];
 
   for (const pkg of createdPackages) {
     const route = createdRoutes.find(r => r.id === pkg.routeId)!;
@@ -262,16 +258,6 @@ async function main() {
           longitude: -52.5000 + getRandomFloat(-1.0, 1.0),
           timestamp: failTime
         });
-
-        occurrencesData.push({
-          title: 'Atraso Critico na Entrega',
-          description: 'Veículo sofreu problemas mecânicos, refletindo em status de falha/atrasado',
-          severity: OccurrenceSeverity.HIGH,
-          packageId: pkg.id,
-          routeId: route.id,
-          reportedById: route.driverId ? (createdDrivers.find(d => d.id === route.driverId)?.userId ?? admin.id) : admin.id,
-          createdAt: failTime
-        });
       }
       
       if (pkg.status === PackageStatus.RETURNED) {
@@ -285,25 +271,12 @@ async function main() {
           longitude: -52.5000 + getRandomFloat(-1.0, 1.0),
           timestamp: failTime
         });
-
-        occurrencesData.push({
-          title: 'Cliente ausente / Endereço não encontrado',
-          description: 'Tentativa de entrega falhou, pacote retornando à base',
-          severity: OccurrenceSeverity.LOW,
-          packageId: pkg.id,
-          routeId: route.id,
-          reportedById: route.driverId ? (createdDrivers.find(d => d.id === route.driverId)?.userId ?? admin.id) : admin.id,
-          createdAt: failTime
-        });
       }
     }
   }
 
   // Batch insert
   await prisma.tracking.createMany({ data: trackingData });
-  if (occurrencesData.length > 0) {
-    await prisma.occurrence.createMany({ data: occurrencesData });
-  }
 
   console.log('✅ Base de dados re-populada com sucesso com regras de BI reais!');
   console.log(`📊 Totais inseridos:`);
@@ -314,7 +287,6 @@ async function main() {
   console.log(` - Rotas: ${createdRoutes.length}`);
   console.log(` - Pacotes: ${createdPackages.length}`);
   console.log(` - Eventos Tracking: ${trackingData.length}`);
-  console.log(` - Ocorrências (Atrasos/Problemas): ${occurrencesData.length}`);
 }
 
 main()
